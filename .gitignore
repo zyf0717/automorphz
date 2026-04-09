@@ -123,3 +123,6 @@ dmypy.json
 
 # Results folder
 Results/
+
+# Images folder(s)
+Fundus/

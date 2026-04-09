@@ -98,7 +98,7 @@ class BasicDataset_OUT(Dataset):
         
         self.ids = [splitext(file)[0] for file in sorted(listdir(image_dir))
                     if not file.startswith('.')]
-        logging.info(f'Creating dataset with {len(self.ids)} images')
+        logging.info('Creating dataset with %d images from %s', len(self.ids), image_dir)
 
         
     def __len__(self):
@@ -136,4 +136,3 @@ class BasicDataset_OUT(Dataset):
             'img_file': img_file,
             'image': torch.from_numpy(image_processed).type(torch.FloatTensor)
         }
-

@@ -25,7 +25,7 @@ class TrainDataset(Dataset):
         self.ids = [splitext(file)[0] for file in listdir(self.im_list)
                     if not file.startswith('.')]
         #logging.info(f'Creating dataset with {(self.ids)} ')
-        logging.info(f'Creating dataset with {len(self.ids)} images')
+        logging.info('Creating dataset with %d images from %s', len(self.ids), self.im_list)
         
 
     def label_encoding(self, gdt):
@@ -88,8 +88,7 @@ class TestDataset(Dataset):
         
         self.ids = [splitext(file)[0] for file in listdir(self.im_list)
                     if not file.startswith('.')]
-        logging.info(f'Creating dataset with {(self.ids)} ')
-        logging.info(f'Creating dataset with {len(self.ids)} images')
+        logging.info('Creating dataset with %d images from %s', len(self.ids), self.im_list)
         
         #self.mask_list = df.mask_paths
         self.tg_size = tg_size
@@ -223,4 +222,3 @@ def get_test_dataset(data_path, csv_path='test.csv', tg_size=(512, 512)):
     test_loader = DataLoader(dataset=test_dataset, batch_size=16, num_workers=8, pin_memory=False)
 
     return test_loader
-

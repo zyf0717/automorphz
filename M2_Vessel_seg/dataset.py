@@ -30,7 +30,7 @@ class SEDataset(Dataset):
         self.ids = [splitext(file)[0] for file in listdir(imgs_dir)
                     if not file.startswith('.')]
         #logging.info(f'Creating dataset with {(self.ids)} ')
-        logging.info(f'Creating dataset with {len(self.ids)} images')
+        logging.info('Creating dataset with %d images from %s', len(self.ids), imgs_dir)
 
     def __len__(self):
         return len(self.ids)
@@ -200,7 +200,7 @@ class SEDataset_out(Dataset):
         self.ids = [splitext(file)[0] for file in listdir(imgs_dir)
                     if not file.startswith('.')]
         #logging.info(f'Creating dataset with {(self.ids)} ')
-        logging.info(f'Creating dataset with {len(self.ids)} images')
+        logging.info('Creating dataset with %d images from %s', len(self.ids), imgs_dir)
 
     def __len__(self):
         return len(self.ids)

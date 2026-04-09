@@ -25,6 +25,7 @@ estimated value and it is sorted by image file name.
 import argparse
 import glob
 # import numpy as np
+import logging
 import os
 import sys
 import h5py
@@ -37,9 +38,11 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from retipy import configuration, retina, tortuosity_measures
-from helpers.runtime import portable_basename
+from helpers.runtime import configure_logging, portable_basename
 
 AUTOMORPH_DATA = os.getenv('AUTOMORPH_DATA','../..')
+configure_logging()
+LOGGER = logging.getLogger(__name__)
 
 if not os.path.exists(f'{AUTOMORPH_DATA}/Results/M3/Disc_centred/Width/'):
     os.makedirs(f'{AUTOMORPH_DATA}/Results/M3/Disc_centred/Width/')
@@ -73,7 +76,14 @@ Artery_PATH = f'{AUTOMORPH_DATA}/Results/M2/artery_vein/Zone_C_disc_centred_arte
 Vein_PATH = f'{AUTOMORPH_DATA}/Results/M2/artery_vein/Zone_C_disc_centred_vein_skeleton'
 Binary_PATH = f'{AUTOMORPH_DATA}/Results/M2/binary_vessel/Zone_C_disc_centred_binary_skeleton'
 
-for filename in sorted(glob.glob(os.path.join(Binary_PATH, '*.png'))):
+binary_files = sorted(glob.glob(os.path.join(Binary_PATH, '*.png')))
+artery_files = sorted(glob.glob(os.path.join(Artery_PATH, '*.png')))
+vein_files = sorted(glob.glob(os.path.join(Vein_PATH, '*.png')))
+
+LOGGER.info("Disc-centred zone C: %d binary, %d artery, %d vein images", len(binary_files), len(artery_files), len(vein_files))
+
+for index, filename in enumerate(binary_files, start=1):
+    LOGGER.info("[Disc Zone C][binary] %d/%d %s", index, len(binary_files), portable_basename(filename))
     try:
         segmentedImage = retina.Retina(None, filename, store_path=f'{AUTOMORPH_DATA}/Results/M2/binary_vessel/Zone_C_disc_centred_binary_process')
         #segmentedImage.threshold_image()
@@ -92,7 +102,8 @@ for filename in sorted(glob.glob(os.path.join(Binary_PATH, '*.png'))):
         binary_Average_width.append(Average_width)
         name_binary_list.append(portable_basename(filename))
 
-    except:
+    except Exception:
+        LOGGER.exception("[Disc Zone C][binary] Failed: %s", filename)
         binary_t2_list.append(-1)
         binary_t4_list.append(-1)
         binary_t5_list.append(-1)
@@ -104,7 +115,8 @@ for filename in sorted(glob.glob(os.path.join(Binary_PATH, '*.png'))):
 
 
 
-for filename in sorted(glob.glob(os.path.join(Artery_PATH, '*.png'))):
+for index, filename in enumerate(artery_files, start=1):
+    LOGGER.info("[Disc Zone C][artery] %d/%d %s", index, len(artery_files), portable_basename(filename))
 
     try:
         segmentedImage = retina.Retina(None, filename,store_path=f'{AUTOMORPH_DATA}/Results/M2/artery_vein/Zone_C_disc_centred_artery_process')
@@ -123,7 +135,8 @@ for filename in sorted(glob.glob(os.path.join(Artery_PATH, '*.png'))):
         CRAE_Knudtson_list.append(CRAE_Knudtson)
         name_artery_list.append(portable_basename(filename)) 
 
-    except:
+    except Exception:
+        LOGGER.exception("[Disc Zone C][artery] Failed: %s", filename)
         artery_t2_list.append(-1)
         artery_t4_list.append(-1)
         artery_t5_list.append(-1)
@@ -138,7 +151,8 @@ for filename in sorted(glob.glob(os.path.join(Artery_PATH, '*.png'))):
 ####################################3
 
 
-for filename in sorted(glob.glob(os.path.join(Vein_PATH, '*.png'))):
+for index, filename in enumerate(vein_files, start=1):
+    LOGGER.info("[Disc Zone C][vein] %d/%d %s", index, len(vein_files), portable_basename(filename))
 
     try:
         segmentedImage = retina.Retina(None, filename,store_path=f'{AUTOMORPH_DATA}/Results/M2/artery_vein/Zone_C_disc_centred_vein_process')
@@ -160,7 +174,8 @@ for filename in sorted(glob.glob(os.path.join(Vein_PATH, '*.png'))):
         CRVE_Knudtson_list.append(CRVE_Knudtson)
         name_vein_list.append(portable_basename(filename))
 
-    except:
+    except Exception:
+        LOGGER.exception("[Disc Zone C][vein] Failed: %s", filename)
         
         vein_t2_list.append(-1)
         vein_t4_list.append(-1)
@@ -225,3 +240,4 @@ Data4stage2['AVR_Hubbard'] = Data4stage2['CRAE_Hubbard']/Data4stage2['CRVE_Hubba
 Data4stage2['AVR_Knudtson'] = Data4stage2['CRAE_Knudtson']/Data4stage2['CRVE_Knudtson']
 
 Data4stage2.to_csv(f'{AUTOMORPH_DATA}/Results/M3/Disc_centred/Disc_Zone_C_Measurement.csv', index = None, encoding='utf8')
+LOGGER.info("Wrote %s", f'{AUTOMORPH_DATA}/Results/M3/Disc_centred/Disc_Zone_C_Measurement.csv')

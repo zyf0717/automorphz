@@ -65,18 +65,6 @@ def prepare_data_dirs() -> None:
     print("AUTOMORPH_DATA not set, using default directory", flush=True)
 
 
-def module_env(*, add_pythonpath: bool = False) -> dict[str, str]:
-    env: dict[str, str] = {}
-    if add_pythonpath:
-        pythonpath = os.environ.get("PYTHONPATH")
-        env["PYTHONPATH"] = f".{os.pathsep}{pythonpath}" if pythonpath else "."
-    return env
-
-
-def data_ref(default_relative: str) -> str:
-    return os.getenv("AUTOMORPH_DATA", default_relative)
-
-
 def run_preprocess() -> None:
     print("### Preprocess Start ###", flush=True)
     run_command([sys.executable, "EyeQ_process_main.py"], cwd=REPO_ROOT / "M0_Preprocess")

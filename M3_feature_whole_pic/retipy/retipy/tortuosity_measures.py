@@ -18,6 +18,7 @@
 
 import math
 import numpy as np
+import sys
 from function_ import fractal_dimension, smoothing
 from retipy import math as m
 from retipy.retina import Retina, Window, detect_vessel_border
@@ -25,6 +26,11 @@ from scipy.interpolate import CubicSpline
 from PIL import Image
 import time
 import cv2
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 def fractal_dimension(Z):
 
@@ -413,7 +419,7 @@ def width_measurement(x, y, vessel_map):
 
 
 
-def evaluate_window(window: Window, min_pixels_per_vessel=10, sampling_size=6, r2_threshold=0.80, store_path='/home/jupyter/Deep_rias/Results/M2/artery_vein/vein_binary_process'):  # pragma: no cover
+def evaluate_window(window: Window, min_pixels_per_vessel=10, sampling_size=6, r2_threshold=0.80, store_path='Results/M2/artery_vein/vein_binary_process'):  # pragma: no cover
     """
     Evaluates a Window object and sets the tortuosity values in the tag parameter.
     :param window: The window object to be evaluated

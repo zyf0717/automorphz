@@ -26,12 +26,19 @@ import argparse
 import glob
 # import numpy as np
 import os
+import sys
 import h5py
 import shutil
 import pandas as pd
+from pathlib import Path
 # import scipy.stats as stats
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 from retipy import configuration, retina, tortuosity_measures
+from runtime_utils import portable_basename
 
 AUTOMORPH_DATA = os.getenv('AUTOMORPH_DATA','../..')
 
@@ -87,7 +94,7 @@ for filename in sorted(glob.glob(os.path.join(Binary_PATH, '*.png'))):
         binary_FD_binary.append(FD_binary)
         binary_VD_binary.append(VD_binary)
         binary_Average_width.append(Average_width)
-        name_binary_list.append(filename.split('/')[-1])
+        name_binary_list.append(portable_basename(filename))
         
     except:
         binary_t2_list.append(-1)
@@ -96,7 +103,7 @@ for filename in sorted(glob.glob(os.path.join(Binary_PATH, '*.png'))):
         binary_FD_binary.append(-1)
         binary_VD_binary.append(-1)
         binary_Average_width.append(-1)
-        name_binary_list.append(filename.split('/')[-1])
+        name_binary_list.append(portable_basename(filename))
 
 
 for filename in sorted(glob.glob(os.path.join(Artery_PATH, '*.png'))):
@@ -115,7 +122,7 @@ for filename in sorted(glob.glob(os.path.join(Artery_PATH, '*.png'))):
         artery_FD_binary.append(FD_binary)
         artery_VD_binary.append(VD_binary)
         artery_Average_width.append(Average_width)
-        name_artery_list.append(filename.split('/')[-1]) 
+        name_artery_list.append(portable_basename(filename)) 
     
     
     except:
@@ -125,7 +132,7 @@ for filename in sorted(glob.glob(os.path.join(Artery_PATH, '*.png'))):
         artery_FD_binary.append(-1)
         artery_VD_binary.append(-1)
         artery_Average_width.append(-1)  
-        name_artery_list.append(filename.split('/')[-1])  
+        name_artery_list.append(portable_basename(filename))  
 
 
 for filename in sorted(glob.glob(os.path.join(Vein_PATH, '*.png'))):
@@ -143,7 +150,7 @@ for filename in sorted(glob.glob(os.path.join(Vein_PATH, '*.png'))):
         vein_FD_binary.append(FD_binary)
         vein_VD_binary.append(VD_binary)
         vein_Average_width.append(Average_width)
-        name_vein_list.append(filename.split('/')[-1])
+        name_vein_list.append(portable_basename(filename))
     
     except:
         
@@ -153,7 +160,7 @@ for filename in sorted(glob.glob(os.path.join(Vein_PATH, '*.png'))):
         vein_FD_binary.append(-1)
         vein_VD_binary.append(-1)
         vein_Average_width.append(-1)
-        name_vein_list.append(filename.split('/')[-1])
+        name_vein_list.append(portable_basename(filename))
 
 
 Disc_file = pd.read_csv(f"{AUTOMORPH_DATA}/Results/M3/Disc_centred/Disc_cup_results.csv").astype({"Name": "object"})

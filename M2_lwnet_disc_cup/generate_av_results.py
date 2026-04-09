@@ -10,6 +10,7 @@ from torchvision.utils import save_image
 import torch
 import torch.nn.functional as F
 import torchvision
+from pathlib import Path
 from models.get_model import get_arch
 from utils.get_loaders import get_test_dataset
 from utils.model_saving_loading import load_model
@@ -18,18 +19,32 @@ import pandas as pd
 from skimage.morphology import remove_small_objects
 import logging
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from runtime_utils import parse_image_size, resolve_setting, resolve_torch_device
+
 AUTOMORPH_DATA = os.getenv('AUTOMORPH_DATA','..')
 
 # argument parsing
 parser = argparse.ArgumentParser()
-required_named = parser.add_argument_group('required arguments')
-parser.add_argument('--experiment_path', help='experiments/subfolder where checkpoint is', default=None)
 parser.add_argument('--config_file', type=str, default=None,
                     help='experiments/name_of_config_file, overrides everything')
-# in case no config file is passed
-parser.add_argument('--im_size', help='delimited list input, could be 600,400', type=str, default='512')
-parser.add_argument('--device', type=str, default='cuda:0', help='where to run the training code (e.g. "cpu" or "cuda:0") [default: %(default)s]')
-parser.add_argument('--results_path', type=str, default='results', help='path to save predictions (defaults to results')
+parser.add_argument('--im_size', help='delimited list input, could be 600,400', type=str, default=None)
+parser.add_argument('--device', type=str, default=None, help='where to run the code (e.g. "cpu", "mps", or "cuda:0")')
+
+
+def load_experiment_config(config_file: str | None) -> dict:
+    if config_file is None:
+        return {}
+    if not osp.isfile(config_file):
+        raise FileNotFoundError('non-existent config file')
+    with open(config_file, 'r') as handle:
+        data = json.load(handle)
+    if not isinstance(data, dict):
+        raise ValueError('experiment config must be a JSON object')
+    return data
 
 
 def intersection(mask,vessel_, it_x, it_y):
@@ -618,39 +633,25 @@ if __name__ == '__main__':
     
     logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
     args = parser.parse_args()
-    results_path = args.results_path
-    # Check if CUDA is available
-    if torch.cuda.is_available():
-        logging.info("CUDA is available. Using CUDA...")
-        device = torch.device("cuda:0")
-    elif torch.backends.mps.is_available():  # Check if MPS is available (for macOS)
-        logging.info("MPS is available. Using MPS...")
-        device = torch.device("mps")
-    else:
-        logging.info("Neither CUDA nor MPS is available. Using CPU...")
-        device = torch.device("cpu")
+    experiment_config = load_experiment_config(args.config_file)
+    requested_device = resolve_setting(args.device, experiment_config.get("device"), default="auto")
+    device = torch.device(
+        resolve_torch_device(
+            requested_device,
+            cuda_available=torch.cuda.is_available(),
+            mps_available=torch.backends.mps.is_available(),
+        )
+    )
 
     logging.info(f'Using device {device}')
-
-
-    # parse config file if provided
-    config_file = args.config_file
-    if config_file is not None:
-        if not osp.isfile(config_file): raise Exception('non-existent config file')
-        with open(args.config_file, 'r') as f:
-            args.__dict__ = json.load(f)
-    experiment_path = args.experiment_path  # this should exist in a config file
-    model_name = args.model_name
-
-    if experiment_path is None: raise Exception('must specify path to experiment')
-
-    im_size = tuple([int(item) for item in args.im_size.split(',')])
-    if isinstance(im_size, tuple) and len(im_size) == 1:
-        tg_size = (im_size[0], im_size[0])
-    elif isinstance(im_size, tuple) and len(im_size) == 2:
-        tg_size = (im_size[0], im_size[1])
-    else:
-        sys.exit('im_size should be a number or a tuple of two numbers')
+    model_name = experiment_config.get("model_name")
+    if not model_name:
+        raise ValueError("model_name must be provided in the experiment config file")
+    im_size = resolve_setting(args.im_size, experiment_config.get("im_size"), default="512")
+    try:
+        tg_size = parse_image_size(im_size)
+    except ValueError as exc:
+        sys.exit(str(exc))
 
     data_path = f'{AUTOMORPH_DATA}/Results/M1/Good_quality/'
 

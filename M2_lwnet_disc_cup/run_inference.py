@@ -13,6 +13,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from config_utils import load_config
+from runtime_utils import resolve_torch_device
 SCRIPT_DIR = Path(__file__).resolve().parent
 
 
@@ -24,24 +25,17 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--device", default=None)
     return parser
 
-
-def resolve_device(device: str | None) -> str:
-    if device:
-        return device
-    if torch.cuda.is_available():
-        return "cuda:0"
-    if torch.backends.mps.is_available():
-        return "mps"
-    return "cpu"
-
-
 def main() -> int:
     args = build_parser().parse_args()
     cfg = load_config(args.config).get("optic_disc_cup", {})
     config_file = args.config_file if args.config_file is not None else cfg["config_file"]
     image_size = args.image_size if args.image_size is not None else cfg["image_size"]
     raw_device = args.device if args.device is not None else cfg.get("device")
-    device = resolve_device(None if raw_device == "auto" else raw_device)
+    device = resolve_torch_device(
+        raw_device,
+        cuda_available=torch.cuda.is_available(),
+        mps_available=torch.backends.mps.is_available(),
+    )
     subprocess.run(
         [
             sys.executable,

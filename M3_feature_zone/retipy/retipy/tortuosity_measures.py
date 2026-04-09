@@ -18,6 +18,7 @@
 
 import math
 import numpy as np
+import sys
 from function_ import fractal_dimension, smoothing
 from retipy import math as m
 from retipy.retina import Retina, Window, detect_vessel_border
@@ -25,6 +26,13 @@ from scipy.interpolate import CubicSpline
 from PIL import Image
 import time
 import cv2
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from runtime_utils import portable_parent_name
 
 def fractal_dimension(Z):
 
@@ -415,7 +423,7 @@ def width_measurement(x, y, retinal):
 
 
 
-def evaluate_window(window: Window, min_pixels_per_vessel=10, sampling_size=6, r2_threshold=0.80, store_path='/home/jupyter/Deep_rias/Results/M2/artery_vein/vein_binary_process'):  # pragma: no cover
+def evaluate_window(window: Window, min_pixels_per_vessel=10, sampling_size=6, r2_threshold=0.80, store_path='Results/M2/artery_vein/vein_binary_process'):  # pragma: no cover
     """
     Evaluates a Window object and sets the tortuosity values in the tag parameter.
     :param window: The window object to be evaluated
@@ -520,7 +528,7 @@ def evaluate_window(window: Window, min_pixels_per_vessel=10, sampling_size=6, r
         #print('CRAE_first_round', CRAE_first_round)
         #print('CRVE_first_round', CRVE_first_round)
 
-        if 'artery' in store_path.split('/')[-2]: 
+        if 'artery' in portable_parent_name(store_path): 
             w_second_artery_Hubbard_1, w_second_vein_Hubbard_1 = Hubbard_cal(CRAE_first_round[0],CRAE_first_round[2])  
 
             CRAE_second_round = sorted([w_second_artery_Hubbard_1,CRAE_first_round[1]])
@@ -545,7 +553,7 @@ def evaluate_window(window: Window, min_pixels_per_vessel=10, sampling_size=6, r
         CRAE_first_round = sorted([w_first_artery_Knudtson_1,w_first_artery_Knudtson_2,w_first_artery_Knudtson_3])
         CRVE_first_round = sorted([w_first_vein_Knudtson_1,w_first_vein_Knudtson_2,w_first_vein_Knudtson_3])
 
-        if 'artery' in store_path.split('/')[-2]: 
+        if 'artery' in portable_parent_name(store_path): 
             w_second_artery_Knudtson_1, w_second_vein_Knudtson_1 = Knudtson_cal(CRAE_first_round[0],CRAE_first_round[2])  
 
             CRAE_second_round = sorted([w_second_artery_Knudtson_1,CRAE_first_round[1]])

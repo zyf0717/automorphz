@@ -1,22 +1,6 @@
-# AutoMorph 2022
-Code for [AutoMorph: Automated Retinal Vascular Morphology Quantification via a Deep Learning Pipeline](https://tvst.arvojournals.org/article.aspx?articleid=2783477).
+# automorphz
 
-Please contact 	**ykzhoua@gmail.com** or **yukun.zhou.19@ucl.ac.uk** if you have questions.
-
-Project website: https://rmaphoh.github.io/projects/automorph.html
-
-Talks on NIHR Moorfields BRC: https://moorfieldsbrc.nihr.ac.uk/case-study/research-report/
-
-
-
-## News
-2024-06-27 update: PyTorch 2.3 and Python 3.11 are supported; Apple Silicon (M2) GPU support and CPU support were added (thanks to [staskh](https://github.com/staskh)).
-
-2023-08-24 update: Added feature measurement for disc-centred images; removed unused files.
-&nbsp;
-
-
-
+Forked from code for [AutoMorph: Automated Retinal Vascular Morphology Quantification via a Deep Learning Pipeline](https://tvst.arvojournals.org/article.aspx?articleid=2783477), repository [here](https://github.com/rmaphoh/AutoMorph).
 
 ## Pixel resolution
 
@@ -30,11 +14,11 @@ python generate_resolution.py
 &nbsp;
 
 
-## Running AutoMorph
+## Running automorphz
 
 ### Requirements
 
-1. Linux or macOS is recommended. On Windows, install [MinGW-w64](https://www.mingw-w64.org/) if you want to use the shell commands below.
+1. Linux, macOS, and Windows can use the Python entrypoint below. MinGW is not required for the documented workflow.
 2. Anaconda or Miniconda must be installed.
 3. Python 3.11 and PyTorch 2.3.1 are installed through the steps below.
 4. GPU acceleration is strongly recommended. Apple Silicon (MPS) is supported directly by `environment.yml`. CPU execution is supported but will be much slower.
@@ -61,6 +45,7 @@ conda activate automorphz
 
 `environment.yml` is the source of truth for local dependencies.
 Runtime defaults for the pipeline and stage wrappers live in `config.yaml`. Command-line flags still override those defaults.
+`pytest` is included for the small regression test suite in `tests/`.
 
 ### Configuration
 
@@ -101,7 +86,10 @@ python main.py --no-feature
 python main.py --config config.yaml
 ```
 
-&nbsp;
+Run the regression tests:
+```bash
+pytest
+```
 
 ## Common questions
 

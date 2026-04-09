@@ -159,9 +159,9 @@ def build_pseudo_dataset(train_csv_path, test_csv_path, path_to_preds):
     test_pseudo_gt_list = []
 
     for n in test_im_list:
-        im_name_no_extension = n.split('/')[-1][:-4]
+        im_name_no_extension = osp.splitext(osp.basename(n))[0]
         for pred_name in test_preds:
-            pred_name_no_extension = pred_name.split('/')[-1][:-4]
+            pred_name_no_extension = osp.splitext(osp.basename(pred_name))[0]
             if im_name_no_extension == pred_name_no_extension:
                 test_pseudo_gt_list.append(osp.join(path_to_preds, pred_name))
                 break
@@ -223,6 +223,5 @@ def get_test_dataset(data_path, csv_path='test.csv', tg_size=(512, 512)):
     test_loader = DataLoader(dataset=test_dataset, batch_size=16, num_workers=8, pin_memory=False)
 
     return test_loader
-
 
 

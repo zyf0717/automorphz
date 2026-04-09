@@ -26,12 +26,19 @@ import argparse
 import glob
 # import numpy as np
 import os
+import sys
 import h5py
 import shutil
 import pandas as pd
+from pathlib import Path
 # import scipy.stats as stats
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 from retipy import configuration, retina, tortuosity_measures
+from runtime_utils import portable_basename
 
 AUTOMORPH_DATA = os.getenv('AUTOMORPH_DATA','../..')
 
@@ -94,7 +101,7 @@ for filename in sorted(glob.glob(os.path.join(Binary_PATH, '*.png'))):
         binary_FD_binary.append(FD_binary)
         binary_VD_binary.append(VD_binary)
         binary_Average_width.append(Average_width)
-        name_binary_list.append(filename.split('/')[-1])
+        name_binary_list.append(portable_basename(filename))
     
     except:
         binary_t2_list.append(-1)
@@ -103,7 +110,7 @@ for filename in sorted(glob.glob(os.path.join(Binary_PATH, '*.png'))):
         binary_FD_binary.append(-1)
         binary_VD_binary.append(-1)
         binary_Average_width.append(-1)
-        name_binary_list.append(filename.split('/')[-1])
+        name_binary_list.append(portable_basename(filename))
 
 
 
@@ -125,7 +132,7 @@ for filename in sorted(glob.glob(os.path.join(Artery_PATH, '*.png'))):
         artery_Average_width.append(Average_width)
         CRAE_Hubbard_list.append(CRAE_Hubbard)
         CRAE_Knudtson_list.append(CRAE_Knudtson)
-        name_artery_list.append(filename.split('/')[-1])
+        name_artery_list.append(portable_basename(filename))
 
     except:
         artery_t2_list.append(-1)
@@ -136,7 +143,7 @@ for filename in sorted(glob.glob(os.path.join(Artery_PATH, '*.png'))):
         artery_Average_width.append(-1)
         CRAE_Hubbard_list.append(-1)
         CRAE_Knudtson_list.append(-1)    
-        name_artery_list.append(filename.split('/')[-1])
+        name_artery_list.append(portable_basename(filename))
 
 ####################################3
 
@@ -161,7 +168,7 @@ for filename in sorted(glob.glob(os.path.join(Vein_PATH, '*.png'))):
         vein_Average_width.append(Average_width)
         CRVE_Hubbard_list.append(CRVE_Hubbard)
         CRVE_Knudtson_list.append(CRVE_Knudtson)
-        name_vein_list.append(filename.split('/')[-1])
+        name_vein_list.append(portable_basename(filename))
 
     except:
         
@@ -173,7 +180,7 @@ for filename in sorted(glob.glob(os.path.join(Vein_PATH, '*.png'))):
         vein_Average_width.append(-1)
         CRVE_Hubbard_list.append(-1)
         CRVE_Knudtson_list.append(-1)
-        name_vein_list.append(filename.split('/')[-1])
+        name_vein_list.append(portable_basename(filename))
         
         
 

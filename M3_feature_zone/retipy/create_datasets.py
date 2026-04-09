@@ -26,21 +26,28 @@ import argparse
 import glob
 # import numpy as np
 import os
+import sys
 import h5py
 import shutil
 import pandas as pd
+from pathlib import Path
 # import scipy.stats as stats
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 from retipy import configuration, retina, tortuosity_measures
+from runtime_utils import portable_basename
 
 AUTOMORPH_DATA = os.getenv('AUTOMORPH_DATA','../..')
 
-if os.path.exists('/home/jupyter/Deep_rias/Results/M2/artery_vein/artery_binary_skeleton/.ipynb_checkpoints'):
-    shutil.rmtree('/home/jupyter/Deep_rias/Results/M2/artery_vein/artery_binary_skeleton/.ipynb_checkpoints') 
-if os.path.exists('/home/jupyter/Deep_rias/Results/M2/binary_vessel/binary_skeleton/.ipynb_checkpoints'):
-    shutil.rmtree('/home/jupyter/Deep_rias/Results/M2/binary_vessel/binary_skeleton/.ipynb_checkpoints') 
-if os.path.exists('/home/jupyter/Deep_rias/Results/M2/artery_vein/vein_binary_skeleton/.ipynb_checkpoints'):
-    shutil.rmtree('/home/jupyter/Deep_rias/Results/M2/artery_vein/vein_binary_skeleton/.ipynb_checkpoints')
+if os.path.exists(f'{AUTOMORPH_DATA}/Results/M2/artery_vein/artery_binary_skeleton/.ipynb_checkpoints'):
+    shutil.rmtree(f'{AUTOMORPH_DATA}/Results/M2/artery_vein/artery_binary_skeleton/.ipynb_checkpoints') 
+if os.path.exists(f'{AUTOMORPH_DATA}/Results/M2/binary_vessel/binary_skeleton/.ipynb_checkpoints'):
+    shutil.rmtree(f'{AUTOMORPH_DATA}/Results/M2/binary_vessel/binary_skeleton/.ipynb_checkpoints') 
+if os.path.exists(f'{AUTOMORPH_DATA}/Results/M2/artery_vein/vein_binary_skeleton/.ipynb_checkpoints'):
+    shutil.rmtree(f'{AUTOMORPH_DATA}/Results/M2/artery_vein/vein_binary_skeleton/.ipynb_checkpoints')
 if not os.path.exists(f'{AUTOMORPH_DATA}/Results/M3/Width/'):
     os.makedirs(f'{AUTOMORPH_DATA}/Results/M3/Width/')
 
@@ -63,24 +70,24 @@ t4_list = []
 t5_list = []
 name_list = []
 
-Artery_PATH = '/home/jupyter/Deep_rias/Results/M2/artery_vein/artery_binary_skeleton'
-Vein_PATH = '/home/jupyter/Deep_rias/Results/M2/artery_vein/vein_binary_skeleton'
+Artery_PATH = f'{AUTOMORPH_DATA}/Results/M2/artery_vein/artery_binary_skeleton'
+Vein_PATH = f'{AUTOMORPH_DATA}/Results/M2/artery_vein/vein_binary_skeleton'
 
 
 for filename in sorted(glob.glob(os.path.join(CONFIG.image_directory, '*.png'))):
-    segmentedImage = retina.Retina(None, filename, store_path='/home/jupyter/Deep_rias/Results/M2/binary_vessel/binary_process')
+    segmentedImage = retina.Retina(None, filename, store_path=f'{AUTOMORPH_DATA}/Results/M2/binary_vessel/binary_process')
     #segmentedImage.threshold_image()
     #segmentedImage.reshape_square()
     #window_sizes = segmentedImage.get_window_sizes()
     window_sizes = [912]
     window = retina.Window(
         segmentedImage, window_sizes[-1], min_pixels=CONFIG.pixels_per_window)
-    t1, t2, t3, t4, td, tfi, tft, vessel_density, average_caliber,vessel_count,tcurve, bifurcation_t, vessel_count_1, vessel_count_list, w1_list = tortuosity_measures.evaluate_window(window, CONFIG.pixels_per_window, CONFIG.sampling_size, CONFIG.r_2_threshold,store_path='/home/jupyter/Deep_rias/Results/M2/binary_vessel/binary_process/')
+    t1, t2, t3, t4, td, tfi, tft, vessel_density, average_caliber,vessel_count,tcurve, bifurcation_t, vessel_count_1, vessel_count_list, w1_list = tortuosity_measures.evaluate_window(window, CONFIG.pixels_per_window, CONFIG.sampling_size, CONFIG.r_2_threshold,store_path=f'{AUTOMORPH_DATA}/Results/M2/binary_vessel/binary_process/')
     #print(window.tags)
     t2_list.append(t2)
     t4_list.append(t4)
     t5_list.append(td)
-    name_list.append(filename.split('/')[-1])
+    name_list.append(portable_basename(filename))
     #hf = h5py.File(CONFIG.output_folder + "/" + segmentedImage.filename + ".h5", 'w')
     #hf.create_dataset('windows', data=window.windows)
     #hf.create_dataset('tags', data=window.tags)
@@ -103,24 +110,24 @@ name_list = []
 
 for filename in sorted(glob.glob(os.path.join(Artery_PATH, '*.png'))):
 
-    segmentedImage = retina.Retina(None, filename,store_path='/home/jupyter/Deep_rias/Results/M2/artery_vein/artery_binary_process')
+    segmentedImage = retina.Retina(None, filename,store_path=f'{AUTOMORPH_DATA}/Results/M2/artery_vein/artery_binary_process')
     #segmentedImage.threshold_image()
     #segmentedImage.reshape_square()
     #window_sizes = segmentedImage.get_window_sizes()
     window_sizes = [912]
     window = retina.Window(
         segmentedImage, window_sizes[-1], min_pixels=CONFIG.pixels_per_window)
-    t1, t2, t3, t4, td, tfi, tft, vessel_density, average_caliber,vessel_count,tcurve, bifurcation_t, vessel_count_1, vessel_count_list, w1_list = tortuosity_measures.evaluate_window(window, CONFIG.pixels_per_window, CONFIG.sampling_size, CONFIG.r_2_threshold,store_path='/home/jupyter/Deep_rias/Results/M2/artery_vein/artery_binary_process/')
+    t1, t2, t3, t4, td, tfi, tft, vessel_density, average_caliber,vessel_count,tcurve, bifurcation_t, vessel_count_1, vessel_count_list, w1_list = tortuosity_measures.evaluate_window(window, CONFIG.pixels_per_window, CONFIG.sampling_size, CONFIG.r_2_threshold,store_path=f'{AUTOMORPH_DATA}/Results/M2/artery_vein/artery_binary_process/')
     #print(window.tags)
     t2_list.append(t2)
     t4_list.append(t4)
     t5_list.append(td)
-    name_list.append(filename.split('/')[-1])
+    name_list.append(portable_basename(filename))
     #hf = h5py.File(CONFIG.output_folder + "/" + segmentedImage.filename + ".h5", 'w')
     #hf.create_dataset('windows', data=window.windows)
     #hf.create_dataset('tags', data=window.tags)
     #hf.close()
-    print(filename.split('/')[-1])
+    print(portable_basename(filename))
     Data4stage2 = pd.DataFrame({'Order':vessel_count_list, 'Width':w1_list})
     Data4stage2.to_csv(f'{AUTOMORPH_DATA}/Results/M3/Width/artery_width_results_{segmentedImage._file_name}.csv', index = None, encoding='utf8')
     
@@ -137,19 +144,19 @@ name_list = []
 
 for filename in sorted(glob.glob(os.path.join(Vein_PATH, '*.png'))):
 
-    segmentedImage = retina.Retina(None, filename,store_path='/home/jupyter/Deep_rias/Results/M2/artery_vein/vein_binary_process')
+    segmentedImage = retina.Retina(None, filename,store_path=f'{AUTOMORPH_DATA}/Results/M2/artery_vein/vein_binary_process')
     #segmentedImage.threshold_image()
     #segmentedImage.reshape_square()
     #window_sizes = segmentedImage.get_window_sizes()
     window_sizes = [912]
     window = retina.Window(
         segmentedImage, window_sizes[-1], min_pixels=CONFIG.pixels_per_window)
-    t1, t2, t3, t4, td, tfi, tft, vessel_density, average_caliber,vessel_count,tcurve, bifurcation_t, vessel_count_1, vessel_count_list, w1_list = tortuosity_measures.evaluate_window(window, CONFIG.pixels_per_window, CONFIG.sampling_size, CONFIG.r_2_threshold,store_path='/home/jupyter/Deep_rias/Results/M2/artery_vein/vein_binary_process/')
+    t1, t2, t3, t4, td, tfi, tft, vessel_density, average_caliber,vessel_count,tcurve, bifurcation_t, vessel_count_1, vessel_count_list, w1_list = tortuosity_measures.evaluate_window(window, CONFIG.pixels_per_window, CONFIG.sampling_size, CONFIG.r_2_threshold,store_path=f'{AUTOMORPH_DATA}/Results/M2/artery_vein/vein_binary_process/')
     #print(window.tags)
     t2_list.append(t2)
     t4_list.append(t4)
     t5_list.append(td)
-    name_list.append(filename.split('/')[-1])
+    name_list.append(portable_basename(filename))
     #hf = h5py.File(CONFIG.output_folder + "/" + segmentedImage.filename + ".h5", 'w')
     #hf.create_dataset('windows', data=window.windows)
     #hf.create_dataset('tags', data=window.tags)
@@ -161,4 +168,3 @@ Exit_file = pd.read_csv(f'{AUTOMORPH_DATA}/Results/M3/Vein_Features_Measurement.
 Data4stage2 = pd.DataFrame({'Image_id':name_list, 'Tortuosity':t2_list, 'Squared_Curvature_Tortuosity':t4_list, 'Tortuosity_density':t5_list})
 Data4stage2 = pd.concat([Exit_file, Data4stage2], axis=1)
 Data4stage2.to_csv(f'{AUTOMORPH_DATA}/Results/M3/Vein_Tortuosity_Measurement.csv', index = None, encoding='utf8')
-

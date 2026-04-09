@@ -25,11 +25,6 @@ def test_main_runs_stages_in_order(monkeypatch) -> None:
     assert main.main() == 0
     assert prepare_calls == [False]
 
-    expected = [
-        (["main.py"], None),  # placeholder for shape only
-    ]
-    del expected
-
     assert calls == [
         ([main.sys.executable, "EyeQ_process_main.py"], main.REPO_ROOT / "M0_Preprocess"),
         ([main.sys.executable, "run_inference.py", "--config", str(main.DEFAULT_CONFIG_PATH)], main.REPO_ROOT / "M1_Retinal_Image_quality_EyePACS"),
@@ -103,7 +98,7 @@ def test_main_can_force_sample_images(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.setattr(main, "run_preprocess", lambda: None)
     monkeypatch.setattr(main, "run_quality", lambda config_path: None)
     monkeypatch.setattr(main, "run_segmentation", lambda config_path: None)
-    monkeypatch.setattr(main, "run_feature_measurement", lambda: None)
+    monkeypatch.setattr(main, "run_feature_measurement", lambda config_path: None)
     monkeypatch.setattr(main.sys, "argv", ["main.py", "--use-sample-images"])
 
     assert main.main() == 0

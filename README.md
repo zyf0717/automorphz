@@ -67,6 +67,7 @@ Use `config.yaml` to change the default runtime settings for the pipeline, inclu
 * vessel segmentation defaults
 * artery/vein segmentation defaults
 * optic disc/cup segmentation defaults
+* feature-measurement worker count
 
 For example, you can change:
 
@@ -76,6 +77,7 @@ For example, you can change:
 * the segmentation dataset names
 * the optic disc/cup config file
 * the default device for the optic disc/cup stage
+* `feature_measurement.image_workers` to control per-image multiprocessing in the M3 stage
 
 If you want a one-off override, pass a CLI flag instead of editing `config.yaml`. For example:
 ```bash
@@ -86,6 +88,7 @@ python M1_Retinal_Image_quality_EyePACS/run_inference.py --batch-size 32
 
 If `input.global_resolution` is set, `main.py` writes `resolution_information.csv` automatically before preprocessing.
 If `input.image_dir` is set, `main.py` uses that folder as the image source. Relative paths are resolved from the location of `config.yaml`.
+If `feature_measurement.image_workers` is set, each M3 feature script processes images with a local worker pool.
 
 ### Run
 
@@ -163,6 +166,19 @@ In CSV outputs, invalid values such as optic disc segmentation failures are repo
 ### Resolution choice
 
 If you use the native PDF extraction helper and assume the extracted image spans the full `50°` field, `0.0055 mm/pixel` is the current working value in `config.yaml`.
+
+### Feature measurement speed
+
+The M3 feature-measurement stage is CPU-bound and does not use the GPU. The repo now parallelizes work within each M3 script at the per-image level.
+
+The active default is:
+
+```yaml
+feature_measurement:
+  image_workers: 6
+```
+
+Reduce `image_workers` if your machine becomes oversubscribed. If M3 is still slow after that, the remaining bottleneck is inside the per-image retipy calculations rather than the top-level pipeline orchestration.
 
 
 ### Components

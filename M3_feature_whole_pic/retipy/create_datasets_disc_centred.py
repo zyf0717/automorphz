@@ -1,215 +1,64 @@
 #!/usr/bin/env python3
 
-# Retipy - Retinal Image Processing on Python
-# Copyright (C) 2017  Alejandro Valdes
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-"""
-script to estimate the linear tortuosity of a set of retinal images, it will output the values
-to a file in the output folder defined in the configuration. The output will only have the
-estimated value and it is sorted by image file name.
-"""
-
 import argparse
-import glob
-# import numpy as np
 import logging
 import os
 import sys
-import h5py
-import pandas as pd
 from pathlib import Path
-# import scipy.stats as stats
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from retipy import configuration, retina, tortuosity_measures
-from helpers.runtime import configure_logging, portable_basename
+from helpers.m3_measurement import run_whole_measurement
+from helpers.runtime import configure_logging
 
-AUTOMORPH_DATA = os.getenv('AUTOMORPH_DATA','../..')
-configure_logging()
+AUTOMORPH_DATA = os.getenv("AUTOMORPH_DATA", "../..")
 LOGGER = logging.getLogger(__name__)
 
-if not os.path.exists(f'{AUTOMORPH_DATA}/Results/M3/Disc_centred/Width/'):
-    os.makedirs(f'{AUTOMORPH_DATA}/Results/M3/Disc_centred/Width/')
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-c",
+        "--configuration",
+        help="the configuration file location",
+        default="resources/retipy.config",
+    )
+    return parser
 
 
-parser = argparse.ArgumentParser()
+def main() -> int:
+    args = build_parser().parse_args()
+    configure_logging()
+    script_root = Path(__file__).resolve().parent
+    data_root = Path(AUTOMORPH_DATA)
 
-parser.add_argument(
-    "-c",
-    "--configuration",
-    help="the configuration file location",
-    default="resources/retipy.config")
-args = parser.parse_args()
-
-CONFIG = configuration.Configuration(args.configuration)
-binary_FD_binary,binary_VD_binary,binary_Average_width,binary_t2_list,binary_t4_list,binary_t5_list = [],[],[],[],[],[]
-artery_FD_binary,artery_VD_binary,artery_Average_width,artery_t2_list,artery_t4_list,artery_t5_list = [],[],[],[],[],[]
-vein_FD_binary,vein_VD_binary,vein_Average_width,vein_t2_list,vein_t4_list,vein_t5_list = [],[],[],[],[],[]
-name_binary_list = []
-name_artery_list = []
-name_vein_list = []
-
-Artery_PATH = f'{AUTOMORPH_DATA}/Results/M2/artery_vein/disc_centred_artery_skeleton'
-Vein_PATH = f'{AUTOMORPH_DATA}/Results/M2/artery_vein/disc_centred_vein_skeleton'
-Binary_PATH = f'{AUTOMORPH_DATA}/Results/M2/binary_vessel/disc_centred_binary_skeleton'
-
-binary_files = sorted(glob.glob(os.path.join(Binary_PATH, '*.png')))
-artery_files = sorted(glob.glob(os.path.join(Artery_PATH, '*.png')))
-vein_files = sorted(glob.glob(os.path.join(Vein_PATH, '*.png')))
-
-LOGGER.info("Disc-centred full image: %d binary, %d artery, %d vein images", len(binary_files), len(artery_files), len(vein_files))
-
-for index, filename in enumerate(binary_files, start=1):
-    LOGGER.info("[Disc Full][binary] %d/%d %s", index, len(binary_files), portable_basename(filename))
-    
-    try:
-        segmentedImage = retina.Retina(None, filename, store_path=f'{AUTOMORPH_DATA}/Results/M2/binary_vessel/disc_centred_binary_process')
-        #segmentedImage.threshold_image()
-        #segmentedImage.reshape_square()
-        #window_sizes = segmentedImage.get_window_sizes()
-        window_sizes = [912]
-        window = retina.Window(
-            segmentedImage, window_sizes[-1], min_pixels=CONFIG.pixels_per_window)
-        FD_binary,VD_binary,Average_width, t2, t4, td = tortuosity_measures.evaluate_window(window, CONFIG.pixels_per_window, CONFIG.sampling_size, CONFIG.r_2_threshold,store_path=f'{AUTOMORPH_DATA}/Results/M2/binary_vessel/disc_centred_binary_process/')
-        #print(window.tags)
-        binary_t2_list.append(t2)
-        binary_t4_list.append(t4)
-        binary_t5_list.append(td)
-        binary_FD_binary.append(FD_binary)
-        binary_VD_binary.append(VD_binary)
-        binary_Average_width.append(Average_width)
-        name_binary_list.append(portable_basename(filename))
-        
-    except Exception:
-        LOGGER.exception("[Disc Full][binary] Failed: %s", filename)
-        binary_t2_list.append(-1)
-        binary_t4_list.append(-1)
-        binary_t5_list.append(-1)
-        binary_FD_binary.append(-1)
-        binary_VD_binary.append(-1)
-        binary_Average_width.append(-1)
-        name_binary_list.append(portable_basename(filename))
+    run_whole_measurement(
+        package_root=script_root,
+        retipy_config_path=script_root / args.configuration,
+        disc_cup_csv=data_root / "Results/M3/Disc_centred/Disc_cup_results.csv",
+        output_csv=data_root / "Results/M3/Disc_centred/Disc_Measurement.csv",
+        title="Disc-centred full image",
+        progress_labels={
+            "binary": "[Disc Full][binary]",
+            "artery": "[Disc Full][artery]",
+            "vein": "[Disc Full][vein]",
+        },
+        input_dirs={
+            "binary": data_root / "Results/M2/binary_vessel/disc_centred_binary_skeleton",
+            "artery": data_root / "Results/M2/artery_vein/disc_centred_artery_skeleton",
+            "vein": data_root / "Results/M2/artery_vein/disc_centred_vein_skeleton",
+        },
+        process_dirs={
+            "binary": data_root / "Results/M2/binary_vessel/disc_centred_binary_process",
+            "artery": data_root / "Results/M2/artery_vein/disc_centred_artery_process",
+            "vein": data_root / "Results/M2/artery_vein/disc_centred_vein_process",
+        },
+        logger=LOGGER,
+    )
+    return 0
 
 
-for index, filename in enumerate(artery_files, start=1):
-    LOGGER.info("[Disc Full][artery] %d/%d %s", index, len(artery_files), portable_basename(filename))
-
-    try:
-        
-        segmentedImage = retina.Retina(None, filename,store_path=f'{AUTOMORPH_DATA}/Results/M2/artery_vein/disc_centred_artery_process')
-        window_sizes = [912]
-        window = retina.Window(
-            segmentedImage, window_sizes[-1], min_pixels=CONFIG.pixels_per_window)
-        FD_binary,VD_binary,Average_width, t2, t4, td = tortuosity_measures.evaluate_window(window, CONFIG.pixels_per_window, CONFIG.sampling_size, CONFIG.r_2_threshold,store_path=f'{AUTOMORPH_DATA}/Results/M2/artery_vein/disc_centred_artery_process/')
-        #print(window.tags)
-        artery_t2_list.append(t2)
-        artery_t4_list.append(t4)
-        artery_t5_list.append(td)
-        artery_FD_binary.append(FD_binary)
-        artery_VD_binary.append(VD_binary)
-        artery_Average_width.append(Average_width)
-        name_artery_list.append(portable_basename(filename)) 
-    
-    
-    except Exception:
-        LOGGER.exception("[Disc Full][artery] Failed: %s", filename)
-        artery_t2_list.append(-1)
-        artery_t4_list.append(-1)
-        artery_t5_list.append(-1)
-        artery_FD_binary.append(-1)
-        artery_VD_binary.append(-1)
-        artery_Average_width.append(-1)  
-        name_artery_list.append(portable_basename(filename))  
-
-
-for index, filename in enumerate(vein_files, start=1):
-    LOGGER.info("[Disc Full][vein] %d/%d %s", index, len(vein_files), portable_basename(filename))
-
-    try:
-        segmentedImage = retina.Retina(None, filename,store_path=f'{AUTOMORPH_DATA}/Results/M2/artery_vein/disc_centred_vein_process')
-        window_sizes = [912]
-        window = retina.Window(
-            segmentedImage, window_sizes[-1], min_pixels=CONFIG.pixels_per_window)
-        FD_binary,VD_binary,Average_width, t2, t4, td = tortuosity_measures.evaluate_window(window, CONFIG.pixels_per_window, CONFIG.sampling_size, CONFIG.r_2_threshold,store_path=f'{AUTOMORPH_DATA}/Results/M2/artery_vein/disc_centred_vein_process/')
-        #print(window.tags)
-        vein_t2_list.append(t2)
-        vein_t4_list.append(t4)
-        vein_t5_list.append(td)
-        vein_FD_binary.append(FD_binary)
-        vein_VD_binary.append(VD_binary)
-        vein_Average_width.append(Average_width)
-        name_vein_list.append(portable_basename(filename))
-    
-    except Exception:
-        LOGGER.exception("[Disc Full][vein] Failed: %s", filename)
-        
-        vein_t2_list.append(-1)
-        vein_t4_list.append(-1)
-        vein_t5_list.append(-1)
-        vein_FD_binary.append(-1)
-        vein_VD_binary.append(-1)
-        vein_Average_width.append(-1)
-        name_vein_list.append(portable_basename(filename))
-
-
-Disc_file = pd.read_csv(f"{AUTOMORPH_DATA}/Results/M3/Disc_centred/Disc_cup_results.csv").astype({"Name": "object"})
-
-Data4stage2_binary = pd.DataFrame(
-    {
-        "Name": name_binary_list,
-        "Fractal_dimension": binary_FD_binary,
-        "Vessel_density": binary_VD_binary,
-        "Average_width": binary_Average_width,
-        "Distance_tortuosity": binary_t2_list,
-        "Squared_curvature_tortuosity": binary_t4_list,
-        "Tortuosity_density": binary_t5_list,
-    }
-).astype({"Name": "object"})
-
-Data4stage2_artery = pd.DataFrame(
-    {
-        "Name": name_artery_list,
-        "Artery_Fractal_dimension": artery_FD_binary,
-        "Artery_Vessel_density": artery_VD_binary,
-        "Artery_Average_width": artery_Average_width,
-        "Artery_Distance_tortuosity": artery_t2_list,
-        "Artery_Squared_curvature_tortuosity": artery_t4_list,
-        "Artery_Tortuosity_density": artery_t5_list,
-    }
-).astype({"Name": "object"})
-
-Data4stage2_vein = pd.DataFrame(
-    {
-        "Name": name_vein_list,
-        "Vein_Fractal_dimension": vein_FD_binary,
-        "Vein_Vessel_density": vein_VD_binary,
-        "Vein_Average_width": vein_Average_width,
-        "Vein_Distance_tortuosity": vein_t2_list,
-        "Vein_Squared_curvature_tortuosity": vein_t4_list,
-        "Vein_Tortuosity_density": vein_t5_list,
-    }
-).astype({"Name": "object"})
-
-
-Disc_file_binary = pd.merge(Disc_file, Data4stage2_binary, how="outer", on=["Name"])
-artery_vein = pd.merge(Data4stage2_artery, Data4stage2_vein, how="outer", on=["Name"])
-Data4stage2 = pd.merge(Disc_file_binary, artery_vein, how="outer", on=["Name"])
-
-Data4stage2.to_csv(f'{AUTOMORPH_DATA}/Results/M3/Disc_centred/Disc_Measurement.csv', index = None, encoding='utf8')
-LOGGER.info("Wrote %s", f'{AUTOMORPH_DATA}/Results/M3/Disc_centred/Disc_Measurement.csv')
+if __name__ == "__main__":
+    raise SystemExit(main())

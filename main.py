@@ -81,9 +81,8 @@ def run_segmentation(config_path: Path | None) -> None:
     run_command(command, cwd=REPO_ROOT / "M2_lwnet_disc_cup")
 
 
-def run_feature_measurement() -> None:
+def run_feature_measurement(config_path: Path | None) -> None:
     LOGGER.info("### Feature Measuring ###")
-
     zone_cwd = REPO_ROOT / "M3_feature_zone" / "retipy"
     for script_name in [
         "create_datasets_disc_centred_B.py",
@@ -155,7 +154,7 @@ def main() -> int:
     if args.no_feature:
         LOGGER.info("### Skipping Feature Measurement ###")
     else:
-        run_feature_measurement()
+        run_feature_measurement(args.config)
 
     LOGGER.info("### Done ###")
     LOGGER.info(timestamp())

@@ -4,21 +4,30 @@ Forked from code for [AutoMorph: Automated Retinal Vascular Morphology Quantific
 
 ## Pixel resolution
 
-The units for vessel average width, disc/cup height and width, and calibre metrics are measured in microns. To compute them, prepare a [resolution_information.csv](https://github.com/rmaphoh/AutoMorph/blob/main/resolution_information.csv) file containing pixel resolution information. You can obtain this from FDA or DICOM files. If exact values are unavailable, you can use an approximate value such as `0.008` for Topcon 3D-OCT.
+The units for vessel average width, disc/cup height and width, and calibre metrics are measured in microns. This repo generates `resolution_information.csv` at runtime from `config.yaml`; the file is not committed.
 
-If you do not use these features or do not need micron-based units, put all images in `./images` and run:
+The active setting is:
 
-```bash
-python generate_resolution.py
+```yaml
+input:
+  global_resolution: 0.0055
 ```
-&nbsp;
+
+`main.py` writes `resolution_information.csv` automatically before preprocessing. Keep `generate_resolution.py` only for manual or mixed workflows where you want to regenerate the file outside the main pipeline.
+
+If `resolution_information.csv` is missing:
+
+* it is not an issue when you run `python main.py` with `input.global_resolution` set
+* it is an issue if you run preprocessing directly or unset `input.global_resolution`, because `M0_Preprocess/EyeQ_process_main.py` reads that file explicitly
+
+A committed template is available at [resolution_information.sample.csv](/Users/yifei/repos/automorphz/resolution_information.sample.csv).
 
 
 ## Running automorphz
 
 ### Requirements
 
-1. Linux, macOS, and Windows can use the Python entrypoint below. MinGW is not required for the documented workflow.
+1. Linux, macOS, and Windows can use the Python entrypoint below.
 2. Anaconda or Miniconda must be installed.
 3. Python 3.11 and PyTorch 2.3.1 are installed through the steps below.
 4. GPU acceleration is strongly recommended. Apple Silicon (MPS) is supported directly by `environment.yml`. CPU execution is supported but will be much slower.
@@ -27,8 +36,8 @@ python generate_resolution.py
 
 Clone the repository:
 ```bash
-git clone https://github.com/rmaphoh/AutoMorph.git
-cd AutoMorph
+git clone <your-repo-url>
+cd automorphz
 ```
 
 Create the Conda environment:
@@ -46,11 +55,13 @@ conda activate automorphz
 `environment.yml` is the source of truth for local dependencies.
 Runtime defaults for the pipeline and stage wrappers live in `config.yaml`. Command-line flags still override those defaults.
 `pytest` is included for the small regression test suite in `tests/`.
+`pymupdf` is installed via `pip` inside the Conda environment for the PDF extraction helper.
 
 ### Configuration
 
 Use `config.yaml` to change the default runtime settings for the pipeline, including:
 
+* input image folder
 * global image resolution for `resolution_information.csv`
 * image quality assessment defaults
 * vessel segmentation defaults
@@ -78,18 +89,23 @@ If `input.image_dir` is set, `main.py` uses that folder as the image source. Rel
 
 ### Run
 
-Place your input images in the `images` folder, then run:
+Set the input folder in `config.yaml`, then run:
+```yaml
+input:
+  image_dir: images
+  global_resolution: 0.0055
+```
+
+Then run:
 ```bash
 python main.py
 ```
 
-If `images/` does not exist, the pipeline falls back to `sample_images/`.
-
-To use a different input folder through the config file:
+To use the bundled sample data through the config file:
 ```yaml
 input:
   image_dir: sample_images
-  global_resolution: 0.00275
+  global_resolution: 0.0055
 ```
 
 To force a run against `sample_images/` even when `images/` exists, use:
@@ -104,15 +120,24 @@ Or use the shell wrapper, which activates `automorphz` and runs from the repo ro
 bash run.sh
 ```
 
-If your raw data is stored recursively under a nested folder, flatten it into the required `images/` layout first:
+If your raw data is stored recursively under a nested folder, flatten it into the required flat image layout first:
 ```bash
 python -m helpers.flatten_nested path/to/nested_folder
 ```
 
-If your raw data is stored as one-PDF-per-eye exports, extract the primary fundus image from each PDF into `images/` with:
+If your raw data is stored as one-PDF-per-eye exports, extract the primary fundus image from each PDF at native embedded raster size with:
 ```bash
 python -m helpers.extract_pdf_fundus eye
 ```
+
+That helper logs:
+
+* how many PDFs were found
+* how many embedded images each PDF contains
+* which embedded image was selected
+* native decoded size
+* whether bright margins were trimmed
+* where each PNG was written
 
 Useful options:
 ```bash
@@ -131,18 +156,13 @@ pytest
 
 ## Common questions
 
-### Memory/ram error
-
-We use a Tesla T4 (16 GB) and 32 vCPUs (120 GB RAM). If you run into memory issues, reduce batch size or image size:
-
-* `python M1_Retinal_Image_quality_EyePACS/run_inference.py --batch-size 32`
-* `python M2_Artery_vein/run_inference.py --batch-size 4`
-* `python M2_lwnet_disc_cup/run_inference.py --image-size 384`
-
-
 ### Invalid results
 
 In CSV outputs, invalid values such as optic disc segmentation failures are reported as `NAN`.
+
+### Resolution choice
+
+If you use the native PDF extraction helper and assume the extracted image spans the full `50°` field, `0.0055 mm/pixel` is the current working value in `config.yaml`.
 
 
 ### Components

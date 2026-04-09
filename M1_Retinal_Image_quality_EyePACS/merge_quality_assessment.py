@@ -1,46 +1,52 @@
 import logging
-import numpy as np
-import pandas as pd
-import shutil
 import os
+import shutil
+from pathlib import Path
+
+import pandas as pd
 
 from runtime_utils import configure_logging
 
-AUTOMORPH_DATA = os.getenv('AUTOMORPH_DATA','..')
-configure_logging()
 LOGGER = logging.getLogger(__name__)
 
-result_Eyepacs = f'{AUTOMORPH_DATA}/Results/M1/results_ensemble.csv'
 
-if not os.path.exists(f'{AUTOMORPH_DATA}/Results/M1/Good_quality/'):
-    os.makedirs(f'{AUTOMORPH_DATA}/Results/M1/Good_quality/')
-if not os.path.exists(f'{AUTOMORPH_DATA}/Results/M1/Bad_quality/'):
-    os.makedirs(f'{AUTOMORPH_DATA}/Results/M1/Bad_quality/')
-
-result_Eyepacs_ = pd.read_csv(result_Eyepacs)
-
-Eyepacs_pre = result_Eyepacs_['Prediction']
-Eyepacs_bad_mean = result_Eyepacs_['softmax_bad']
-Eyepacs_usable_sd = result_Eyepacs_['usable_sd']
-name_list = result_Eyepacs_['Name']
-
-Eye_good = 0
-Eye_bad = 0
-
-for i in range(len(name_list)):
-    
-    if Eyepacs_pre[i]==0:
-        Eye_good+=1
-        shutil.copy(name_list[i], f'{AUTOMORPH_DATA}/Results/M1/Good_quality/')
-    elif (Eyepacs_pre[i]==1) and (Eyepacs_bad_mean[i]<0.25):
-    #elif (Eyepacs_pre[i]==1) and (Eyepacs_bad_mean[i]<0.25) and (Eyepacs_usable_sd[i]<0.1):
-        Eye_good+=1
-        shutil.copy(name_list[i], f'{AUTOMORPH_DATA}/Results/M1/Good_quality/')        
-    else:
-        Eye_bad+=1        
-        shutil.copy(name_list[i], f'{AUTOMORPH_DATA}/Results/M1/Bad_quality/')
-        #shutil.copy(name_list[i], '../Results/M1/Good_quality/')
+def quality_results_dir(base_dir: str | Path | None = None) -> Path:
+    root = Path(base_dir) if base_dir is not None else Path(os.getenv("AUTOMORPH_DATA", ".."))
+    return root / "Results" / "M1"
 
 
-LOGGER.info('Gradable cases by EyePACS_QA is %s', Eye_good)
-LOGGER.info('Ungradable cases by EyePACS_QA is %s', Eye_bad)
+def split_quality_assessment(base_dir: str | Path | None = None) -> tuple[int, int]:
+    results_dir = quality_results_dir(base_dir)
+    good_dir = results_dir / "Good_quality"
+    bad_dir = results_dir / "Bad_quality"
+    good_dir.mkdir(parents=True, exist_ok=True)
+    bad_dir.mkdir(parents=True, exist_ok=True)
+
+    results = pd.read_csv(results_dir / "results_ensemble.csv")
+    eye_good = 0
+    eye_bad = 0
+
+    for _, row in results.iterrows():
+        name = row["Name"]
+        prediction = row["Prediction"]
+        softmax_bad = row["softmax_bad"]
+        if prediction == 0 or (prediction == 1 and softmax_bad < 0.25):
+            eye_good += 1
+            shutil.copy(name, good_dir)
+        else:
+            eye_bad += 1
+            shutil.copy(name, bad_dir)
+
+    LOGGER.info("Gradable cases by EyePACS_QA is %s", eye_good)
+    LOGGER.info("Ungradable cases by EyePACS_QA is %s", eye_bad)
+    return eye_good, eye_bad
+
+
+def main() -> int:
+    configure_logging()
+    split_quality_assessment()
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

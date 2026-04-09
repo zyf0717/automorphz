@@ -11,18 +11,21 @@ import torch
 import torch.nn.functional as F
 import torchvision
 from pathlib import Path
-from models.get_model import get_arch
-from utils.get_loaders import get_test_dataset
-from utils.model_saving_loading import load_model
 from skimage import measure
 import pandas as pd
 from skimage.morphology import remove_small_objects
 import logging
 
+SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from models.get_model import get_arch
+from utils.get_loaders import get_test_dataset
+from utils.model_saving_loading import load_model
 from runtime_utils import parse_image_size, resolve_setting, resolve_torch_device
 
 AUTOMORPH_DATA = os.getenv('AUTOMORPH_DATA','..')
@@ -45,6 +48,28 @@ def load_experiment_config(config_file: str | None) -> dict:
     if not isinstance(data, dict):
         raise ValueError('experiment config must be a JSON object')
     return data
+
+
+def resolve_runtime_options(
+    *,
+    config_file: str | None,
+    cli_im_size: str | None,
+    cli_device: str | None,
+    cuda_available: bool,
+    mps_available: bool,
+) -> tuple[dict, tuple[int, int], torch.device]:
+    experiment_config = load_experiment_config(config_file)
+    requested_device = resolve_setting(cli_device, experiment_config.get("device"), default="auto")
+    device = torch.device(
+        resolve_torch_device(
+            requested_device,
+            cuda_available=cuda_available,
+            mps_available=mps_available,
+        )
+    )
+    im_size = resolve_setting(cli_im_size, experiment_config.get("im_size"), default="512")
+    tg_size = parse_image_size(im_size)
+    return experiment_config, tg_size, device
 
 
 def intersection(mask,vessel_, it_x, it_y):
@@ -629,29 +654,24 @@ def prediction_eval(model_1,model_2,model_3,model_4,model_5,model_6,model_7,mode
                 
 
 
-if __name__ == '__main__':
-    
+def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
-    args = parser.parse_args()
-    experiment_config = load_experiment_config(args.config_file)
-    requested_device = resolve_setting(args.device, experiment_config.get("device"), default="auto")
-    device = torch.device(
-        resolve_torch_device(
-            requested_device,
+    args = parser.parse_args(argv)
+    try:
+        experiment_config, tg_size, device = resolve_runtime_options(
+            config_file=args.config_file,
+            cli_im_size=args.im_size,
+            cli_device=args.device,
             cuda_available=torch.cuda.is_available(),
             mps_available=torch.backends.mps.is_available(),
         )
-    )
+    except ValueError as exc:
+        sys.exit(str(exc))
 
     logging.info(f'Using device {device}')
     model_name = experiment_config.get("model_name")
     if not model_name:
         raise ValueError("model_name must be provided in the experiment config file")
-    im_size = resolve_setting(args.im_size, experiment_config.get("im_size"), default="512")
-    try:
-        tg_size = parse_image_size(im_size)
-    except ValueError as exc:
-        sys.exit(str(exc))
 
     data_path = f'{AUTOMORPH_DATA}/Results/M1/Good_quality/'
 
@@ -709,4 +729,8 @@ if __name__ == '__main__':
     artery_vein_path = f'{AUTOMORPH_DATA}/Results/M2/artery_vein/'
     
     optic_disc_centre(result_path,binary_vessel_path, artery_vein_path)
-    
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

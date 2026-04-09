@@ -1,5 +1,5 @@
-# AutoMorph 2022 👀
---Code for [AutoMorph: Automated Retinal Vascular Morphology Quantification via a Deep Learning Pipeline](https://tvst.arvojournals.org/article.aspx?articleid=2783477).
+# AutoMorph 2022
+Code for [AutoMorph: Automated Retinal Vascular Morphology Quantification via a Deep Learning Pipeline](https://tvst.arvojournals.org/article.aspx?articleid=2783477).
 
 Please contact 	**ykzhoua@gmail.com** or **yukun.zhou.19@ucl.ac.uk** if you have questions.
 
@@ -9,10 +9,10 @@ Talks on NIHR Moorfields BRC: https://moorfieldsbrc.nihr.ac.uk/case-study/resear
 
 
 
-## News 👀
-2025-05-16 update: Docker and its instruction have been updated.
+## News
+2025-05-16 update: Docker and its instructions were updated.
 
-2024-06-27 update: pytorch 2.3 & python 3.11 supported; Mac M2 GPU supported; CPU supported (thanks to [staskh](https://github.com/staskh))
+2024-06-27 update: PyTorch 2.3 and Python 3.11 are supported; Apple Silicon (M2) GPU support and CPU support were added (thanks to [staskh](https://github.com/staskh)).
 
 2023-08-24 update: Added feature measurement for disc-centred images; removed unused files.
 &nbsp;
@@ -22,9 +22,9 @@ Talks on NIHR Moorfields BRC: https://moorfieldsbrc.nihr.ac.uk/case-study/resear
 
 ## Pixel resolution
 
-The units for vessel average width, disc/cup height and width, and calibre metrics are defined as microns. For it, we need to organise a [resolution_information.csv](https://github.com/rmaphoh/AutoMorph/blob/main/resolution_information.csv) which includes the pixel resolution information, which can be queried in FDA or Dicom files. Alternatively, approximate value can be used, e.g., 0.008 for Topcon 3D-OCT.
+The units for vessel average width, disc/cup height and width, and calibre metrics are measured in microns. To compute them, prepare a [resolution_information.csv](https://github.com/rmaphoh/AutoMorph/blob/main/resolution_information.csv) file containing pixel resolution information. You can obtain this from FDA or DICOM files. If exact values are unavailable, you can use an approximate value such as `0.008` for Topcon 3D-OCT.
 
-**If you don't use these features or care their units**, you can put all images in the folder ./images and run
+If you do not use these features or do not need micron-based units, put all images in `./images` and run:
 
 ```bash
 python generate_resolution.py
@@ -35,9 +35,9 @@ python generate_resolution.py
 ## Running AutoMorph
 ### Running with Colab
 
-Use the Google Colab and a free Tesla T4 gpu [Colab link click](https://colab.research.google.com/drive/13Qh9umwRM1OMRiNLyILbpq3k9h55FjNZ?usp=sharing).
+Use Google Colab with a free Tesla T4 GPU: [Colab notebook](https://colab.research.google.com/drive/13Qh9umwRM1OMRiNLyILbpq3k9h55FjNZ?usp=sharing).
 
-👀 A specific version for [APTOSxJSAIO 2025 hands-on tutorial](https://colab.research.google.com/drive/1ppzxBElLa_yJl-V3IWKyQQDG_2m6OWVL#scrollTo=vnEudwJimFgt)
+A version prepared for the [APTOSxJSAIO 2025 hands-on tutorial](https://colab.research.google.com/drive/1ppzxBElLa_yJl-V3IWKyQQDG_2m6OWVL#scrollTo=vnEudwJimFgt) is also available.
 
 
 ### Running on local/virtual machine
@@ -48,12 +48,12 @@ conda env create -f environment.yml
 conda activate automorphz
 ```
 
-This environment file is the single source of truth for local setup and installs the required Python dependencies directly with Conda. Full instructions are in [LOCAL.md](LOCAL.md).
+`environment.yml` is the source of truth for local dependencies. Full setup and run instructions are in [LOCAL.md](LOCAL.md).
 
 
 ### Running with Docker
 
-Zero experience in Docker? No worries [DOCKER.md](DOCKER.md).
+If you prefer Docker, see [DOCKER.md](DOCKER.md).
 
 &nbsp;
 
@@ -61,7 +61,7 @@ Zero experience in Docker? No worries [DOCKER.md](DOCKER.md).
 
 ### Memory/ram error
 
-We use Tesla T4 (16Gb) and 32vCPUs (120Gb). When you meet memory/ram issue in running, try to decrease batch size or image size:
+We use a Tesla T4 (16 GB) and 32 vCPUs (120 GB RAM). If you run into memory issues, reduce batch size or image size:
 
 * `python M1_Retinal_Image_quality_EyePACS/run_inference.py --batch-size 32`
 * `python M2_Artery_vein/run_inference.py --batch-size 4`
@@ -70,14 +70,14 @@ We use Tesla T4 (16Gb) and 32vCPUs (120Gb). When you meet memory/ram issue in ru
 
 ### Invalid results
 
-In csv files, invalid values (e.g., optic disc segmentation failure) are indicated with NAN values.  
+In CSV outputs, invalid values such as optic disc segmentation failures are reported as `NAN`.
 
 
 ### Components
 
 1. Vessel segmentation [BF-Net](https://github.com/rmaphoh/Learning-AVSegmentation.git)
 
-2. Image pre-processing [EyeQ](https://github.com/HzFu/EyeQ.git) 
+2. Image preprocessing [EyeQ](https://github.com/HzFu/EyeQ.git)
 
 3. Optic disc segmentation [lwnet](https://github.com/agaldran/lwnet.git)
 

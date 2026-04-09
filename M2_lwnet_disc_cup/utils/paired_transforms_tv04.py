@@ -13,12 +13,18 @@ import numbers
 import types
 import collections
 import warnings
+from importlib.metadata import PackageNotFoundError, version
 
 from torchvision.transforms import functional as F
 
-import pkg_resources
 import distutils.version
-TORCHVISION_VERSION = distutils.version.LooseVersion(pkg_resources.require('torchvision')[0].version)
+
+try:
+    _torchvision_version = version("torchvision")
+except PackageNotFoundError:
+    _torchvision_version = "0"
+
+TORCHVISION_VERSION = distutils.version.LooseVersion(_torchvision_version)
 
 if sys.version_info < (3, 3):
     Sequence = collections.Sequence
@@ -1446,4 +1452,3 @@ class RandomErasing(object):
         if target is not None:
             return img, target
         return img
-

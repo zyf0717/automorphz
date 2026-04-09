@@ -2,15 +2,15 @@
 
 ### Requirements
 
-1. Linux or Mac are preferred. For windows, install [MinGW-w64](https://www.mingw-w64.org/) for using commands below to set enviroment.
-2. Anaconda or miniconda installed.
-3. Python 3.11 and PyTorch 2.3.1 (installation steps below)
+1. Linux or macOS is recommended. On Windows, install [MinGW-w64](https://www.mingw-w64.org/) if you want to use the shell commands below.
+2. Anaconda or Miniconda must be installed.
+3. Python 3.11 and PyTorch 2.3.1 are installed through the steps below.
 4. GPU acceleration is strongly recommended: Apple Silicon (MPS) is supported directly by `environment.yml`. CPU execution is supported but will be much slower.
 
 
 ### Package installation
 
-Step 1: clone the code:
+Step 1: clone the repository:
 ```bash
 git clone https://github.com/rmaphoh/AutoMorph.git
 cd AutoMorph
@@ -32,9 +32,17 @@ This installs all required Python packages directly from Conda using `environmen
 
 ### Running
 
-Put the images in folder 'images' and
+Place your input images in the `images` folder, then run:
 ```bash
 python main.py
 ```
 
-Please note that resolution_information.csv includes the resolution for image, i.e., size for each pixel. Please prepare it for the customised data in the same format.
+Useful options:
+```bash
+python main.py --no-process
+python main.py --no-quality
+python main.py --no-segmentation
+python main.py --no-feature
+```
+
+`resolution_information.csv` stores per-image pixel resolution. For custom data, prepare this file in the same format.

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import logging
 import re
+import sys
 
 
 def _split_path(path: str) -> list[str]:
@@ -52,3 +54,7 @@ def parse_image_size(value: str) -> tuple[int, int]:
     if len(parts) == 2:
         return (parts[0], parts[1])
     raise ValueError("im_size should be a number or a tuple of two numbers")
+
+
+def configure_logging(*, level: int = logging.INFO, stream=None, fmt: str = "%(message)s") -> None:
+    logging.basicConfig(level=level, format=fmt, stream=stream, force=True)

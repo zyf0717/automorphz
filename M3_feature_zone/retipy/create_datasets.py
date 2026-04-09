@@ -25,6 +25,7 @@ estimated value and it is sorted by image file name.
 import argparse
 import glob
 # import numpy as np
+import logging
 import os
 import sys
 import h5py
@@ -38,9 +39,11 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from retipy import configuration, retina, tortuosity_measures
-from runtime_utils import portable_basename
+from runtime_utils import configure_logging, portable_basename
 
 AUTOMORPH_DATA = os.getenv('AUTOMORPH_DATA','../..')
+configure_logging()
+LOGGER = logging.getLogger(__name__)
 
 if os.path.exists(f'{AUTOMORPH_DATA}/Results/M2/artery_vein/artery_binary_skeleton/.ipynb_checkpoints'):
     shutil.rmtree(f'{AUTOMORPH_DATA}/Results/M2/artery_vein/artery_binary_skeleton/.ipynb_checkpoints') 
@@ -127,7 +130,7 @@ for filename in sorted(glob.glob(os.path.join(Artery_PATH, '*.png'))):
     #hf.create_dataset('windows', data=window.windows)
     #hf.create_dataset('tags', data=window.tags)
     #hf.close()
-    print(portable_basename(filename))
+    LOGGER.info("%s", portable_basename(filename))
     Data4stage2 = pd.DataFrame({'Order':vessel_count_list, 'Width':w1_list})
     Data4stage2.to_csv(f'{AUTOMORPH_DATA}/Results/M3/Width/artery_width_results_{segmentedImage._file_name}.csv', index = None, encoding='utf8')
     

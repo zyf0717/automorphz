@@ -1,11 +1,17 @@
 import fundus_prep as prep
+import logging
 import os
 import pandas as pd
 from PIL import ImageFile
 import shutil
+
+from runtime_utils import configure_logging
+
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 AUTOMORPH_DATA = os.getenv('AUTOMORPH_DATA','..')
+configure_logging()
+LOGGER = logging.getLogger(__name__)
 
 def process(image_list, save_path):
     
@@ -22,7 +28,7 @@ def process(image_list, save_path):
         
         dst_image = f'{AUTOMORPH_DATA}/images/' + image_path
         if os.path.exists(f'{AUTOMORPH_DATA}/Results/M0/images/' + image_path):
-            print('continue...')
+            LOGGER.info('Skipping already processed image: %s', image_path)
             continue
         try:
             resolution_ = resolution_list['res'][resolution_list['fundus']==image_path].values[0]
@@ -52,7 +58,6 @@ if __name__ == "__main__":
     process(image_list, save_path)
 
         
-
 
 
 

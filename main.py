@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import logging
 import os
 import shlex
 import shutil
@@ -11,16 +12,14 @@ from datetime import datetime
 from pathlib import Path
 
 from config_utils import DEFAULT_CONFIG_PATH
+from runtime_utils import configure_logging
 
 REPO_ROOT = Path(__file__).resolve().parent
+LOGGER = logging.getLogger(__name__)
 
 
 def timestamp() -> str:
     return datetime.now().astimezone().strftime("%a %b %d %H:%M:%S %Z %Y")
-
-
-def print_timestamp() -> None:
-    print(timestamp(), flush=True)
 
 
 def format_command(command: list[str]) -> str:
@@ -37,7 +36,7 @@ def run_command(
     if env_overrides:
         env.update(env_overrides)
 
-    print(f"$ {format_command(command)}", flush=True)
+    LOGGER.info("$ %s", format_command(command))
     subprocess.run(command, cwd=cwd, env=env, check=True)
 
 
@@ -58,20 +57,20 @@ def prepare_data_dirs() -> None:
         (data_path / "images").mkdir(exist_ok=True)
         (data_path / "Results").mkdir(exist_ok=True)
         clear_directory(data_path / "Results")
-        print(f"AUTOMORPH_DATA set to {automorph_data}", flush=True)
+        LOGGER.info("AUTOMORPH_DATA set to %s", automorph_data)
         return
 
     clear_directory(REPO_ROOT / "Results")
-    print("AUTOMORPH_DATA not set, using default directory", flush=True)
+    LOGGER.info("AUTOMORPH_DATA not set, using default directory")
 
 
 def run_preprocess() -> None:
-    print("### Preprocess Start ###", flush=True)
+    LOGGER.info("### Preprocess Start ###")
     run_command([sys.executable, "EyeQ_process_main.py"], cwd=REPO_ROOT / "M0_Preprocess")
 
 
 def run_quality(config_path: Path | None) -> None:
-    print("### Image Quality Assessment ###", flush=True)
+    LOGGER.info("### Image Quality Assessment ###")
     command = [sys.executable, "run_inference.py"]
     if config_path is not None:
         command.extend(["--config", str(config_path)])
@@ -79,7 +78,7 @@ def run_quality(config_path: Path | None) -> None:
 
 
 def run_segmentation(config_path: Path | None) -> None:
-    print("### Segmentation Modules ###", flush=True)
+    LOGGER.info("### Segmentation Modules ###")
     command = [sys.executable, "run_inference.py"]
     if config_path is not None:
         command.extend(["--config", str(config_path)])
@@ -89,7 +88,7 @@ def run_segmentation(config_path: Path | None) -> None:
 
 
 def run_feature_measurement() -> None:
-    print("### Feature Measuring ###", flush=True)
+    LOGGER.info("### Feature Measuring ###")
 
     zone_cwd = REPO_ROOT / "M3_feature_zone" / "retipy"
     for script_name in [
@@ -133,31 +132,32 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> int:
     args = build_parser().parse_args()
 
-    print_timestamp()
+    configure_logging()
+    LOGGER.info(timestamp())
     prepare_data_dirs()
 
     if args.no_process:
-        print("### Skipping Preprocessing ###", flush=True)
+        LOGGER.info("### Skipping Preprocessing ###")
     else:
         run_preprocess()
 
     if args.no_quality:
-        print("### Skipping Image Quality Assessment ###", flush=True)
+        LOGGER.info("### Skipping Image Quality Assessment ###")
     else:
         run_quality(args.config)
 
     if args.no_segmentation:
-        print("### Skipping Segmentation Modules ###", flush=True)
+        LOGGER.info("### Skipping Segmentation Modules ###")
     else:
         run_segmentation(args.config)
 
     if args.no_feature:
-        print("### Skipping Feature Measurement ###", flush=True)
+        LOGGER.info("### Skipping Feature Measurement ###")
     else:
         run_feature_measurement()
 
-    print("### Done ###", flush=True)
-    print_timestamp()
+    LOGGER.info("### Done ###")
+    LOGGER.info(timestamp())
     return 0
 
 

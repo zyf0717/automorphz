@@ -1,9 +1,14 @@
+import logging
 import numpy as np
 import pandas as pd
 import shutil
 import os
 
+from runtime_utils import configure_logging
+
 AUTOMORPH_DATA = os.getenv('AUTOMORPH_DATA','..')
+configure_logging()
+LOGGER = logging.getLogger(__name__)
 
 result_Eyepacs = f'{AUTOMORPH_DATA}/Results/M1/results_ensemble.csv'
 
@@ -37,5 +42,5 @@ for i in range(len(name_list)):
         #shutil.copy(name_list[i], '../Results/M1/Good_quality/')
 
 
-print('Gradable cases by EyePACS_QA is {} '.format(Eye_good))
-print('Ungradable cases by EyePACS_QA is {} '.format(Eye_bad))
+LOGGER.info('Gradable cases by EyePACS_QA is %s', Eye_good)
+LOGGER.info('Ungradable cases by EyePACS_QA is %s', Eye_bad)

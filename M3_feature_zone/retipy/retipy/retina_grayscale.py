@@ -17,6 +17,7 @@
 """retina module to handle basic image processing on retinal images"""
 
 import base64
+import logging
 from copy import copy
 import numpy as np
 import cv2
@@ -26,6 +27,8 @@ from matplotlib import pyplot as plt
 from os import path
 from PIL import Image
 from io import BytesIO
+
+LOGGER = logging.getLogger(__name__)
 
 class Retina_grayscale(object):
     """
@@ -306,7 +309,13 @@ class Retina_grayscale(object):
                         false_positive += 1
                     elif (image[i, j] == 0 and result[i, j] == 1):
                         false_negative += 1
-        print(true_positive, true_negative, false_positive, false_negative)
+        LOGGER.debug(
+            "%s %s %s %s",
+            true_positive,
+            true_negative,
+            false_positive,
+            false_negative,
+        )
         self.roc[0, :] = [true_positive, true_negative, false_positive, false_negative,
                           (true_positive + true_negative + false_positive + false_negative)]
 
@@ -320,5 +329,4 @@ class Retina_grayscale(object):
         """show a window with the internal image"""
         io.imshow(self.np_image)
         plt.show()
-
 

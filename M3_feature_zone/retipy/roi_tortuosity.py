@@ -20,11 +20,14 @@ Executable file to test some tortuosity measures included in the tortuosity modu
 """
 
 import argparse
+import logging
 import json
 import numpy as np
+import sys
 from PIL import Image
 from retipy import tortuosity
 
+from runtime_utils import configure_logging
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -54,4 +57,5 @@ if args.algorithm == "TD":
         threshold=args.threshold)
 
 encoder = json.JSONEncoder()
-print(encoder.encode(evaluation))
+configure_logging(stream=sys.stdout)
+logging.getLogger(__name__).info("%s", encoder.encode(evaluation))

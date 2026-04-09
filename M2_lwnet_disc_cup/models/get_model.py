@@ -1,7 +1,10 @@
+import logging
 import sys
 from .res_unet_adrian import UNet as unet
 
 import torch
+
+from runtime_utils import configure_logging
 
 # from .res_unet_adrian import WNet as wnet
 class wnet(torch.nn.Module):
@@ -37,12 +40,13 @@ def get_arch(model_name, in_c=3, n_classes=1):
     return model
 if __name__ == '__main__':
     import time
+    configure_logging()
+    logger = logging.getLogger(__name__)
     batch_size = 1
     batch = torch.zeros([batch_size, 1, 80, 80], dtype=torch.float32)
     model = get_arch('unet')
-    print("Total params: {0:,}".format(sum(p.numel() for p in model.parameters() if p.requires_grad)))
-    print('Forward pass (bs={:d}) when running in the cpu:'.format(batch_size))
+    logger.info("Total params: %s", format(sum(p.numel() for p in model.parameters() if p.requires_grad), ","))
+    logger.info('Forward pass (bs=%d) when running in the cpu:', batch_size)
     start_time = time.time()
     logits = model(batch)
-    print("--- %s seconds ---" % (time.time() - start_time))
-
+    logger.info("--- %s seconds ---", time.time() - start_time)

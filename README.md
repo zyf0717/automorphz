@@ -59,6 +59,7 @@ Use `config.yaml` to change the default runtime settings for the pipeline, inclu
 
 For example, you can change:
 
+* `input.image_dir` to point the pipeline at a different input image folder
 * `input.global_resolution` to apply one device-wide value to every image automatically
 * default batch sizes
 * the segmentation dataset names
@@ -73,6 +74,7 @@ python M1_Retinal_Image_quality_EyePACS/run_inference.py --batch-size 32
 ```
 
 If `input.global_resolution` is set, `main.py` writes `resolution_information.csv` automatically before preprocessing.
+If `input.image_dir` is set, `main.py` uses that folder as the image source. Relative paths are resolved from the location of `config.yaml`.
 
 ### Run
 
@@ -82,6 +84,20 @@ python main.py
 ```
 
 If `images/` does not exist, the pipeline falls back to `sample_images/`.
+
+To use a different input folder through the config file:
+```yaml
+input:
+  image_dir: sample_images
+  global_resolution: 0.00275
+```
+
+To force a run against `sample_images/` even when `images/` exists, use:
+```bash
+python main.py --use-sample-images
+```
+
+That runs in an isolated `.automorph_sample_run/` data directory so your normal `images/` and `Results/` are left alone.
 
 Or use the shell wrapper, which activates `automorphz` and runs from the repo root:
 ```bash
@@ -100,6 +116,7 @@ python main.py --no-quality
 python main.py --no-segmentation
 python main.py --no-feature
 python main.py --config config.yaml
+python main.py --use-sample-images
 ```
 
 Run the regression tests:

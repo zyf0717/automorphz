@@ -5,7 +5,6 @@ import argparse
 import logging
 import os
 import shlex
-import shutil
 import subprocess
 import sys
 from datetime import datetime
@@ -13,11 +12,12 @@ from pathlib import Path
 
 from helpers.config import DEFAULT_CONFIG_PATH
 from helpers.config import load_config
+from helpers.data import data_root
+from helpers.data import prepare_data_dirs
 from helpers.resolution import write_global_resolution_csv
 from helpers.runtime import configure_logging
 
 REPO_ROOT = Path(__file__).resolve().parent
-SAMPLE_IMAGES_DIR = REPO_ROOT / "sample_images"
 LOGGER = logging.getLogger(__name__)
 
 
@@ -41,58 +41,6 @@ def run_command(
 
     LOGGER.info("$ %s", format_command(command))
     subprocess.run(command, cwd=cwd, env=env, check=True)
-
-
-def clear_directory(path: Path) -> None:
-    path.mkdir(parents=True, exist_ok=True)
-    for child in path.iterdir():
-        if child.is_dir() and not child.is_symlink():
-            shutil.rmtree(child)
-        else:
-            child.unlink()
-
-
-def ensure_images_dir(images_dir: Path, *, sample_images_dir: Path | None = None) -> None:
-    if sample_images_dir is None:
-        sample_images_dir = SAMPLE_IMAGES_DIR
-
-    if images_dir.exists():
-        return
-
-    images_dir.parent.mkdir(parents=True, exist_ok=True)
-    if not sample_images_dir.exists():
-        images_dir.mkdir(exist_ok=True)
-        return
-
-    try:
-        images_dir.symlink_to(sample_images_dir, target_is_directory=True)
-    except OSError:
-        shutil.copytree(sample_images_dir, images_dir)
-
-    LOGGER.info("Using sample images from %s", sample_images_dir)
-
-
-def prepare_data_dirs() -> None:
-    automorph_data = os.getenv("AUTOMORPH_DATA")
-    if automorph_data:
-        data_path = Path(automorph_data)
-        data_path.mkdir(parents=True, exist_ok=True)
-        ensure_images_dir(data_path / "images")
-        (data_path / "Results").mkdir(exist_ok=True)
-        clear_directory(data_path / "Results")
-        LOGGER.info("AUTOMORPH_DATA set to %s", automorph_data)
-        return
-
-    ensure_images_dir(REPO_ROOT / "images")
-    clear_directory(REPO_ROOT / "Results")
-    LOGGER.info("AUTOMORPH_DATA not set, using default directory")
-
-
-def data_root() -> Path:
-    automorph_data = os.getenv("AUTOMORPH_DATA")
-    if automorph_data:
-        return Path(automorph_data)
-    return REPO_ROOT
 
 
 def apply_global_resolution(config_path: Path | None) -> None:
@@ -172,6 +120,12 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
     )
     parser.add_argument("--no-feature", "--no_feature", dest="no_feature", action="store_true")
+    parser.add_argument(
+        "--use-sample-images",
+        dest="use_sample_images",
+        action="store_true",
+        help="Run against sample_images/ in an isolated sample-data directory.",
+    )
     return parser
 
 
@@ -180,7 +134,7 @@ def main() -> int:
 
     configure_logging()
     LOGGER.info(timestamp())
-    prepare_data_dirs()
+    prepare_data_dirs(config_path=args.config, use_sample_images=args.use_sample_images)
     apply_global_resolution(args.config)
 
     if args.no_process:

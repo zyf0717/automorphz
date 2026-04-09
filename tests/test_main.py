@@ -7,17 +7,23 @@ import main
 
 def test_main_runs_stages_in_order(monkeypatch) -> None:
     calls: list[tuple[list[str], Path]] = []
+    prepare_calls: list[bool] = []
 
     def fake_run_command(command, *, cwd=main.REPO_ROOT, env_overrides=None):
         calls.append((command, cwd))
 
+    def fake_prepare_data_dirs(*, config_path=None, use_sample_images=False):
+        assert config_path == main.DEFAULT_CONFIG_PATH
+        prepare_calls.append(use_sample_images)
+
     monkeypatch.setattr(main, "run_command", fake_run_command)
-    monkeypatch.setattr(main, "prepare_data_dirs", lambda: None)
+    monkeypatch.setattr(main, "prepare_data_dirs", fake_prepare_data_dirs)
     monkeypatch.setattr(main, "configure_logging", lambda: None)
     monkeypatch.setattr(main, "timestamp", lambda: "ts")
     monkeypatch.setattr(main.sys, "argv", ["main.py"])
 
     assert main.main() == 0
+    assert prepare_calls == [False]
 
     expected = [
         (["main.py"], None),  # placeholder for shape only
@@ -42,17 +48,23 @@ def test_main_runs_stages_in_order(monkeypatch) -> None:
 
 def test_main_respects_skip_flags(monkeypatch) -> None:
     calls: list[tuple[list[str], Path]] = []
+    prepare_calls: list[bool] = []
 
     def fake_run_command(command, *, cwd=main.REPO_ROOT, env_overrides=None):
         calls.append((command, cwd))
 
+    def fake_prepare_data_dirs(*, config_path=None, use_sample_images=False):
+        assert config_path == main.DEFAULT_CONFIG_PATH
+        prepare_calls.append(use_sample_images)
+
     monkeypatch.setattr(main, "run_command", fake_run_command)
-    monkeypatch.setattr(main, "prepare_data_dirs", lambda: None)
+    monkeypatch.setattr(main, "prepare_data_dirs", fake_prepare_data_dirs)
     monkeypatch.setattr(main, "configure_logging", lambda: None)
     monkeypatch.setattr(main, "timestamp", lambda: "ts")
     monkeypatch.setattr(main.sys, "argv", ["main.py", "--no-process", "--no-feature"])
 
     assert main.main() == 0
+    assert prepare_calls == [False]
 
     assert calls == [
         ([main.sys.executable, "run_inference.py", "--config", str(main.DEFAULT_CONFIG_PATH)], main.REPO_ROOT / "M1_Retinal_Image_quality_EyePACS"),
@@ -62,24 +74,8 @@ def test_main_respects_skip_flags(monkeypatch) -> None:
     ]
 
 
-def test_prepare_data_dirs_uses_sample_images_when_images_missing(tmp_path: Path, monkeypatch) -> None:
-    monkeypatch.setattr(main, "REPO_ROOT", tmp_path)
-    monkeypatch.setattr(main, "SAMPLE_IMAGES_DIR", tmp_path / "sample_images")
-    monkeypatch.delenv("AUTOMORPH_DATA", raising=False)
-
-    sample_images = tmp_path / "sample_images"
-    sample_images.mkdir()
-    (sample_images / "example.png").write_text("x", encoding="utf-8")
-
-    main.prepare_data_dirs()
-
-    assert (tmp_path / "images" / "example.png").exists()
-    assert (tmp_path / "Results").exists()
-
-
 def test_apply_global_resolution_writes_resolution_csv(tmp_path: Path, monkeypatch) -> None:
-    monkeypatch.setattr(main, "REPO_ROOT", tmp_path)
-    monkeypatch.delenv("AUTOMORPH_DATA", raising=False)
+    monkeypatch.setattr(main, "data_root", lambda: tmp_path)
 
     images_dir = tmp_path / "images"
     images_dir.mkdir()
@@ -92,3 +88,23 @@ def test_apply_global_resolution_writes_resolution_csv(tmp_path: Path, monkeypat
     assert (tmp_path / "resolution_information.csv").read_text(encoding="utf-8") == (
         "fundus,res\nexample.png,0.00185\n"
     )
+
+
+def test_main_can_force_sample_images(monkeypatch, tmp_path: Path) -> None:
+    prepare_calls: list[bool] = []
+
+    def fake_prepare_data_dirs(*, config_path=None, use_sample_images=False):
+        assert config_path == main.DEFAULT_CONFIG_PATH
+        prepare_calls.append(use_sample_images)
+
+    monkeypatch.setattr(main, "prepare_data_dirs", fake_prepare_data_dirs)
+    monkeypatch.setattr(main, "configure_logging", lambda: None)
+    monkeypatch.setattr(main, "timestamp", lambda: "ts")
+    monkeypatch.setattr(main, "run_preprocess", lambda: None)
+    monkeypatch.setattr(main, "run_quality", lambda config_path: None)
+    monkeypatch.setattr(main, "run_segmentation", lambda config_path: None)
+    monkeypatch.setattr(main, "run_feature_measurement", lambda: None)
+    monkeypatch.setattr(main.sys, "argv", ["main.py", "--use-sample-images"])
+
+    assert main.main() == 0
+    assert prepare_calls == [True]

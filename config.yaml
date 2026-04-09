@@ -1,5 +1,6 @@
 input:
-  global_resolution: 0.000925
+  image_dir: "images"
+  global_resolution: 0.00275
 
 quality:
   batch_size: 64

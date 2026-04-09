@@ -77,6 +77,11 @@ Place your input images in the `images` folder, then run:
 python main.py
 ```
 
+Or use the shell wrapper, which activates `automorphz` and runs from the repo root:
+```bash
+bash run.sh
+```
+
 Useful options:
 ```bash
 python main.py --no-process

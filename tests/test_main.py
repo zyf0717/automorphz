@@ -75,3 +75,20 @@ def test_prepare_data_dirs_uses_sample_images_when_images_missing(tmp_path: Path
 
     assert (tmp_path / "images" / "example.png").exists()
     assert (tmp_path / "Results").exists()
+
+
+def test_apply_global_resolution_writes_resolution_csv(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(main, "REPO_ROOT", tmp_path)
+    monkeypatch.delenv("AUTOMORPH_DATA", raising=False)
+
+    images_dir = tmp_path / "images"
+    images_dir.mkdir()
+    (images_dir / "example.png").write_text("x", encoding="utf-8")
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text("input:\n  global_resolution: 0.00185\n", encoding="utf-8")
+
+    main.apply_global_resolution(config_path)
+
+    assert (tmp_path / "resolution_information.csv").read_text(encoding="utf-8") == (
+        "fundus,res\nexample.png,0.00185\n"
+    )

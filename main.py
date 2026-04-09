@@ -12,6 +12,8 @@ from datetime import datetime
 from pathlib import Path
 
 from helpers.config import DEFAULT_CONFIG_PATH
+from helpers.config import load_config
+from helpers.resolution import write_global_resolution_csv
 from helpers.runtime import configure_logging
 
 REPO_ROOT = Path(__file__).resolve().parent
@@ -86,6 +88,28 @@ def prepare_data_dirs() -> None:
     LOGGER.info("AUTOMORPH_DATA not set, using default directory")
 
 
+def data_root() -> Path:
+    automorph_data = os.getenv("AUTOMORPH_DATA")
+    if automorph_data:
+        return Path(automorph_data)
+    return REPO_ROOT
+
+
+def apply_global_resolution(config_path: Path | None) -> None:
+    config = load_config(config_path)
+    global_resolution = config.get("input", {}).get("global_resolution")
+    if global_resolution is None:
+        return
+
+    root = data_root()
+    output_path = write_global_resolution_csv(
+        root / "images",
+        root / "resolution_information.csv",
+        float(global_resolution),
+    )
+    LOGGER.info("Wrote %s using global_resolution=%s", output_path, global_resolution)
+
+
 def run_preprocess() -> None:
     LOGGER.info("### Preprocess Start ###")
     run_command([sys.executable, "EyeQ_process_main.py"], cwd=REPO_ROOT / "M0_Preprocess")
@@ -157,6 +181,7 @@ def main() -> int:
     configure_logging()
     LOGGER.info(timestamp())
     prepare_data_dirs()
+    apply_global_resolution(args.config)
 
     if args.no_process:
         LOGGER.info("### Skipping Preprocessing ###")

@@ -51,6 +51,7 @@ Runtime defaults for the pipeline and stage wrappers live in `config.yaml`. Comm
 
 Use `config.yaml` to change the default runtime settings for the pipeline, including:
 
+* global image resolution for `resolution_information.csv`
 * image quality assessment defaults
 * vessel segmentation defaults
 * artery/vein segmentation defaults
@@ -58,6 +59,7 @@ Use `config.yaml` to change the default runtime settings for the pipeline, inclu
 
 For example, you can change:
 
+* `input.global_resolution` to apply one device-wide value to every image automatically
 * default batch sizes
 * the segmentation dataset names
 * the optic disc/cup config file
@@ -69,6 +71,8 @@ python main.py --no-feature
 python M2_lwnet_disc_cup/run_inference.py --image-size 384
 python M1_Retinal_Image_quality_EyePACS/run_inference.py --batch-size 32
 ```
+
+If `input.global_resolution` is set, `main.py` writes `resolution_information.csv` automatically before preprocessing.
 
 ### Run
 

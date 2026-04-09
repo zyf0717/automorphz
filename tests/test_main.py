@@ -60,3 +60,18 @@ def test_main_respects_skip_flags(monkeypatch) -> None:
         ([main.sys.executable, "run_inference.py", "--config", str(main.DEFAULT_CONFIG_PATH)], main.REPO_ROOT / "M2_Artery_vein"),
         ([main.sys.executable, "run_inference.py", "--config", str(main.DEFAULT_CONFIG_PATH)], main.REPO_ROOT / "M2_lwnet_disc_cup"),
     ]
+
+
+def test_prepare_data_dirs_uses_sample_images_when_images_missing(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(main, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(main, "SAMPLE_IMAGES_DIR", tmp_path / "sample_images")
+    monkeypatch.delenv("AUTOMORPH_DATA", raising=False)
+
+    sample_images = tmp_path / "sample_images"
+    sample_images.mkdir()
+    (sample_images / "example.png").write_text("x", encoding="utf-8")
+
+    main.prepare_data_dirs()
+
+    assert (tmp_path / "images" / "example.png").exists()
+    assert (tmp_path / "Results").exists()

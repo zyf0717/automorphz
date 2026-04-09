@@ -15,6 +15,7 @@ from helpers.config import DEFAULT_CONFIG_PATH
 from helpers.runtime import configure_logging
 
 REPO_ROOT = Path(__file__).resolve().parent
+SAMPLE_IMAGES_DIR = REPO_ROOT / "sample_images"
 LOGGER = logging.getLogger(__name__)
 
 
@@ -49,17 +50,38 @@ def clear_directory(path: Path) -> None:
             child.unlink()
 
 
+def ensure_images_dir(images_dir: Path, *, sample_images_dir: Path | None = None) -> None:
+    if sample_images_dir is None:
+        sample_images_dir = SAMPLE_IMAGES_DIR
+
+    if images_dir.exists():
+        return
+
+    images_dir.parent.mkdir(parents=True, exist_ok=True)
+    if not sample_images_dir.exists():
+        images_dir.mkdir(exist_ok=True)
+        return
+
+    try:
+        images_dir.symlink_to(sample_images_dir, target_is_directory=True)
+    except OSError:
+        shutil.copytree(sample_images_dir, images_dir)
+
+    LOGGER.info("Using sample images from %s", sample_images_dir)
+
+
 def prepare_data_dirs() -> None:
     automorph_data = os.getenv("AUTOMORPH_DATA")
     if automorph_data:
         data_path = Path(automorph_data)
         data_path.mkdir(parents=True, exist_ok=True)
-        (data_path / "images").mkdir(exist_ok=True)
+        ensure_images_dir(data_path / "images")
         (data_path / "Results").mkdir(exist_ok=True)
         clear_directory(data_path / "Results")
         LOGGER.info("AUTOMORPH_DATA set to %s", automorph_data)
         return
 
+    ensure_images_dir(REPO_ROOT / "images")
     clear_directory(REPO_ROOT / "Results")
     LOGGER.info("AUTOMORPH_DATA not set, using default directory")
 

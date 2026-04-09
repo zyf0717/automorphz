@@ -77,6 +77,8 @@ Place your input images in the `images` folder, then run:
 python main.py
 ```
 
+If `images/` does not exist, the pipeline falls back to `sample_images/`.
+
 Or use the shell wrapper, which activates `automorphz` and runs from the repo root:
 ```bash
 bash run.sh

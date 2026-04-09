@@ -45,7 +45,7 @@ def prepare_destination_dir(destination_dir: Path) -> None:
             destination_dir.unlink()
         else:
             raise ValueError(
-                f"Destination directory is a symlink to {resolved}; remove it before flattening Fundus data"
+                f"Destination directory is a symlink to {resolved}; remove it before flattening nested image data"
             )
 
     destination_dir.mkdir(parents=True, exist_ok=True)

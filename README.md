@@ -10,8 +10,6 @@ Talks on NIHR Moorfields BRC: https://moorfieldsbrc.nihr.ac.uk/case-study/resear
 
 
 ## News
-2025-05-16 update: Docker and its instructions were updated.
-
 2024-06-27 update: PyTorch 2.3 and Python 3.11 are supported; Apple Silicon (M2) GPU support and CPU support were added (thanks to [staskh](https://github.com/staskh)).
 
 2023-08-24 update: Added feature measurement for disc-centred images; removed unused files.
@@ -33,27 +31,50 @@ python generate_resolution.py
 
 
 ## Running AutoMorph
-### Running with Colab
 
-Use Google Colab with a free Tesla T4 GPU: [Colab notebook](https://colab.research.google.com/drive/13Qh9umwRM1OMRiNLyILbpq3k9h55FjNZ?usp=sharing).
+### Requirements
 
-A version prepared for the [APTOSxJSAIO 2025 hands-on tutorial](https://colab.research.google.com/drive/1ppzxBElLa_yJl-V3IWKyQQDG_2m6OWVL#scrollTo=vnEudwJimFgt) is also available.
+1. Linux or macOS is recommended. On Windows, install [MinGW-w64](https://www.mingw-w64.org/) if you want to use the shell commands below.
+2. Anaconda or Miniconda must be installed.
+3. Python 3.11 and PyTorch 2.3.1 are installed through the steps below.
+4. GPU acceleration is strongly recommended. Apple Silicon (MPS) is supported directly by `environment.yml`. CPU execution is supported but will be much slower.
 
+### Setup
 
-### Running on local/virtual machine
+Clone the repository:
+```bash
+git clone https://github.com/rmaphoh/AutoMorph.git
+cd AutoMorph
+```
 
-Recommended local setup uses Conda:
+Create the Conda environment:
 ```bash
 conda env create -f environment.yml
 conda activate automorphz
 ```
 
-`environment.yml` is the source of truth for local dependencies. Full setup and run instructions are in [LOCAL.md](LOCAL.md).
+If you already have an `automorphz` environment, update it instead:
+```bash
+conda env update -n automorphz -f environment.yml --prune
+conda activate automorphz
+```
 
+`environment.yml` is the source of truth for local dependencies.
 
-### Running with Docker
+### Run
 
-If you prefer Docker, see [DOCKER.md](DOCKER.md).
+Place your input images in the `images` folder, then run:
+```bash
+python main.py
+```
+
+Useful options:
+```bash
+python main.py --no-process
+python main.py --no-quality
+python main.py --no-segmentation
+python main.py --no-feature
+```
 
 &nbsp;
 

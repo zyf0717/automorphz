@@ -7,42 +7,54 @@ import subprocess
 import sys
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
+from config_utils import load_config
 SCRIPT_DIR = Path(__file__).resolve().parent
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run retinal image quality assessment.")
-    parser.add_argument("--batch-size", type=int, default=64)
-    parser.add_argument("--cuda-device", default="0")
-    parser.add_argument("--model", default="efficientnet")
-    parser.add_argument("--round", type=int, default=0)
+    parser.add_argument("--config", type=Path, default=None)
+    parser.add_argument("--batch-size", type=int, default=None)
+    parser.add_argument("--cuda-device", default=None)
+    parser.add_argument("--model", default=None)
+    parser.add_argument("--round", type=int, default=None)
     parser.add_argument("--seed-num", type=int, default=None)
     return parser
 
 
 def main() -> int:
     args = build_parser().parse_args()
-    seed_num = args.seed_num if args.seed_num is not None else 42 - 2 * args.round
+    cfg = load_config(args.config).get("quality", {})
+    batch_size = args.batch_size if args.batch_size is not None else cfg["batch_size"]
+    cuda_device = args.cuda_device if args.cuda_device is not None else cfg["cuda_device"]
+    model = args.model if args.model is not None else cfg["model"]
+    round_num = args.round if args.round is not None else cfg["round"]
+    seed_num = args.seed_num if args.seed_num is not None else cfg.get("seed_num")
+    if seed_num is None:
+        seed_num = 42 - 2 * round_num
     automorph_data = os.getenv("AUTOMORPH_DATA", "..")
     env = os.environ.copy()
     pythonpath = env.get("PYTHONPATH")
     env["PYTHONPATH"] = f".{os.pathsep}{pythonpath}" if pythonpath else "."
-    env["CUDA_VISIBLE_DEVICES"] = args.cuda_device
+    env["CUDA_VISIBLE_DEVICES"] = str(cuda_device)
 
     subprocess.run(
         [
             sys.executable,
             "test_outside.py",
             "--e=1",
-            f"--b={args.batch_size}",
-            "--task_name=Retinal_quality",
-            f"--model={args.model}",
-            f"--round={args.round}",
-            "--train_on_dataset=EyePACS_quality",
-            "--test_on_dataset=customised_data",
+            f"--b={batch_size}",
+            f"--task_name={cfg['task_name']}",
+            f"--model={model}",
+            f"--round={round_num}",
+            f"--train_on_dataset={cfg['train_on_dataset']}",
+            f"--test_on_dataset={cfg['test_on_dataset']}",
             f"--test_csv_dir={automorph_data}/Results/M0/images/",
-            "--n_class=3",
+            f"--n_class={cfg['n_class']}",
             f"--seed_num={seed_num}",
         ],
         cwd=SCRIPT_DIR,

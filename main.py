@@ -10,6 +10,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+from config_utils import DEFAULT_CONFIG_PATH
 
 REPO_ROOT = Path(__file__).resolve().parent
 
@@ -81,16 +82,22 @@ def run_preprocess() -> None:
     run_command([sys.executable, "EyeQ_process_main.py"], cwd=REPO_ROOT / "M0_Preprocess")
 
 
-def run_quality() -> None:
+def run_quality(config_path: Path | None) -> None:
     print("### Image Quality Assessment ###", flush=True)
-    run_command([sys.executable, "run_inference.py"], cwd=REPO_ROOT / "M1_Retinal_Image_quality_EyePACS")
+    command = [sys.executable, "run_inference.py"]
+    if config_path is not None:
+        command.extend(["--config", str(config_path)])
+    run_command(command, cwd=REPO_ROOT / "M1_Retinal_Image_quality_EyePACS")
 
 
-def run_segmentation() -> None:
+def run_segmentation(config_path: Path | None) -> None:
     print("### Segmentation Modules ###", flush=True)
-    run_command([sys.executable, "run_inference.py"], cwd=REPO_ROOT / "M2_Vessel_seg")
-    run_command([sys.executable, "run_inference.py"], cwd=REPO_ROOT / "M2_Artery_vein")
-    run_command([sys.executable, "run_inference.py"], cwd=REPO_ROOT / "M2_lwnet_disc_cup")
+    command = [sys.executable, "run_inference.py"]
+    if config_path is not None:
+        command.extend(["--config", str(config_path)])
+    run_command(command, cwd=REPO_ROOT / "M2_Vessel_seg")
+    run_command(command, cwd=REPO_ROOT / "M2_Artery_vein")
+    run_command(command, cwd=REPO_ROOT / "M2_lwnet_disc_cup")
 
 
 def run_feature_measurement() -> None:
@@ -117,6 +124,12 @@ def run_feature_measurement() -> None:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the AutoMorph pipeline.")
+    parser.add_argument(
+        "--config",
+        type=Path,
+        default=DEFAULT_CONFIG_PATH,
+        help="Path to the pipeline config YAML.",
+    )
     parser.add_argument("--no-process", "--no_process", dest="no_process", action="store_true")
     parser.add_argument("--no-quality", "--no_quality", dest="no_quality", action="store_true")
     parser.add_argument(
@@ -143,12 +156,12 @@ def main() -> int:
     if args.no_quality:
         print("### Skipping Image Quality Assessment ###", flush=True)
     else:
-        run_quality()
+        run_quality(args.config)
 
     if args.no_segmentation:
         print("### Skipping Segmentation Modules ###", flush=True)
     else:
-        run_segmentation()
+        run_segmentation(args.config)
 
     if args.no_feature:
         print("### Skipping Feature Measurement ###", flush=True)

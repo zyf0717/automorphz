@@ -1,0 +1,41 @@
+quality:
+  batch_size: 64
+  cuda_device: "0"
+  model: efficientnet
+  round: 0
+  seed_num:
+  task_name: Retinal_quality
+  train_on_dataset: EyePACS_quality
+  test_on_dataset: customised_data
+  n_class: 3
+
+vessel_segmentation:
+  epochs: 1
+  batch_size: 8
+  learning_rate: 0.0002
+  validation_ratio: 10.0
+  alpha: 0.08
+  beta: 1.1
+  gamma: 0.5
+  dataset: ALL-SIX
+  seed_num: 42
+  pre_threshold: 40.0
+  cuda_device: "0"
+  uniform: true
+  worker_num: 2
+  save_model: best
+  train_test_mode: test
+  job_name_template: "20210630_uniform_thres40_{dataset}"
+
+artery_vein:
+  batch_size: 8
+  dataset: ALL-AV
+  checkstart: 1401
+  job_name: 20210724_ALL-AV_randomseed
+  cuda_device: "0"
+  uniform: true
+
+optic_disc_cup:
+  config_file: experiments/wnet_All_three_1024_disc_cup/30/config.cfg
+  image_size: 512
+  device: auto

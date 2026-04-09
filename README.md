@@ -60,6 +60,30 @@ conda activate automorphz
 ```
 
 `environment.yml` is the source of truth for local dependencies.
+Runtime defaults for the pipeline and stage wrappers live in `config.yaml`. Command-line flags still override those defaults.
+
+### Configuration
+
+Use `config.yaml` to change the default runtime settings for the pipeline, including:
+
+* image quality assessment defaults
+* vessel segmentation defaults
+* artery/vein segmentation defaults
+* optic disc/cup segmentation defaults
+
+For example, you can change:
+
+* default batch sizes
+* the segmentation dataset names
+* the optic disc/cup config file
+* the default device for the optic disc/cup stage
+
+If you want a one-off override, pass a CLI flag instead of editing `config.yaml`. For example:
+```bash
+python main.py --no-feature
+python M2_lwnet_disc_cup/run_inference.py --image-size 384
+python M1_Retinal_Image_quality_EyePACS/run_inference.py --batch-size 32
+```
 
 ### Run
 
@@ -74,6 +98,7 @@ python main.py --no-process
 python main.py --no-quality
 python main.py --no-segmentation
 python main.py --no-feature
+python main.py --config config.yaml
 ```
 
 &nbsp;
@@ -103,8 +128,6 @@ In CSV outputs, invalid values such as optic disc segmentation failures are repo
 3. Optic disc segmentation [lwnet](https://github.com/agaldran/lwnet.git)
 
 4. Feature measurement [retipy](https://github.com/alevalv/retipy.git)
-
-&nbsp;
 
 ## Citation
 

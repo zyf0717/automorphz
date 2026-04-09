@@ -42,7 +42,13 @@ Use the Google Colab and a free Tesla T4 gpu [Colab link click](https://colab.re
 
 ### Running on local/virtual machine
 
-Install and use on your own machines [LOCAL.md](LOCAL.md).
+Recommended local setup uses Conda:
+```bash
+conda env create -f environment.yml
+conda activate automorphz
+```
+
+This environment file is the single source of truth for local setup and installs the required Python dependencies directly with Conda. Full instructions are in [LOCAL.md](LOCAL.md).
 
 
 ### Running with Docker
@@ -55,11 +61,11 @@ Zero experience in Docker? No worries [DOCKER.md](DOCKER.md).
 
 ### Memory/ram error
 
-We use Tesla T4 (16Gb) and 32vCPUs (120Gb). When you meet memory/ram issue in running, try to decrease batch size:
+We use Tesla T4 (16Gb) and 32vCPUs (120Gb). When you meet memory/ram issue in running, try to decrease batch size or image size:
 
-* ./M1_Retinal_Image_quality_EyePACS/test_outside.sh -b=64 to smaller, e.g., 32 or 16.
-* ./M2_Artery_vein/test_outside.sh --batch-size=8 to smaller
-* ./M2_lwnet_disc_cup/test_outside.sh --batchsize=8 to smaller
+* `python M1_Retinal_Image_quality_EyePACS/run_inference.py --batch-size 32`
+* `python M2_Artery_vein/run_inference.py --batch-size 4`
+* `python M2_lwnet_disc_cup/run_inference.py --image-size 384`
 
 
 ### Invalid results
@@ -93,4 +99,3 @@ In csv files, invalid values (e.g., optic disc segmentation failure) are indicat
   publisher={The Association for Research in Vision and Ophthalmology}
 }
 ```
-

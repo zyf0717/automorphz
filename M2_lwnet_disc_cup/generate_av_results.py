@@ -257,6 +257,10 @@ def optic_disc_centre(result_path, binary_vessel_path, artery_vein_path):
         
     
     
+    # TODO(parallelism): This per-image disc/cup post-processing loop is one of
+    # the largest remaining CPU hotspots. Split each image into an isolated
+    # worker task, then merge the generated CSV rows and copy/write outputs in a
+    # stable order from the parent process.
     for i in disc_cup_list:
         path_ = result_path+i
         disc_cup_ = cv2.imread(path_)

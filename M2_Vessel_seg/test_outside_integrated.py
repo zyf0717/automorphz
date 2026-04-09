@@ -25,6 +25,9 @@ def filter_frag(data_path):
     VD_cal=[]
     width_cal=[]
 
+    # TODO(parallelism): This loop does per-image morphology, skeletonization,
+    # FD/VD calculation, and file writes. Convert it to per-image workers and
+    # aggregate the measurement rows in the parent process.
     for i in sorted(image_list):
         img=io.imread(data_path + 'resize_binary/' + i, as_gray=True).astype(np.int64)
         img2=img>0

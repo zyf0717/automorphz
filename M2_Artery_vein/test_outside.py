@@ -31,6 +31,9 @@ def filter_frag(data_path):
     width_cal_r=[]
     width_cal_b=[]
     
+    # TODO(parallelism): This artery/vein post-filtering pass is independent
+    # per image and CPU-bound. Use per-image workers, then merge the returned
+    # artery/vein metrics in a deterministic order in the parent process.
     for i in sorted(image_list):
         img=io.imread(data_path + 'resized/' + i).astype(np.int64)
         img = cv2.resize(img,(912,912),interpolation = cv2.INTER_NEAREST)

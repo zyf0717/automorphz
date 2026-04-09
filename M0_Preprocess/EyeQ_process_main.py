@@ -30,6 +30,9 @@ def process(image_list, save_path):
     
     resolution_list = pd.read_csv(f'{AUTOMORPH_DATA}/resolution_information.csv')
     
+    # TODO(parallelism): This per-image preprocessing loop is independent work.
+    # Move it to a worker pool and merge the returned crop metadata before
+    # writing crop_info.csv, similar to the M3 per-image process pool.
     for image_path in image_list:
         
         dst_image = f'{AUTOMORPH_DATA}/images/' + image_path

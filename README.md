@@ -180,6 +180,12 @@ feature_measurement:
 
 Reduce `image_workers` if your machine becomes oversubscribed. If M3 is still slow after that, the remaining bottleneck is inside the per-image retipy calculations rather than the top-level pipeline orchestration.
 
+Parallelism TODOs still worth tackling:
+
+- `M0_Preprocess/EyeQ_process_main.py`: per-image preprocessing is still serial.
+- `M2_lwnet_disc_cup/generate_av_results.py`: disc/cup post-processing still does heavy per-image CPU work in one process.
+- `M2_Vessel_seg/test_outside_integrated.py`: `filter_frag()` is still a serial morphology/skeletonization pass.
+- `M2_Artery_vein/test_outside.py`: `filter_frag()` is still a serial artery/vein morphology pass.
 
 ### Components
 

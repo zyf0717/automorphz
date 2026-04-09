@@ -84,6 +84,11 @@ Or use the shell wrapper, which activates `automorphz` and runs from the repo ro
 bash run.sh
 ```
 
+If your raw data is stored recursively under a nested folder, flatten it into the required `images/` layout first:
+```bash
+python -m helpers.flatten_nested path/to/nested_folder
+```
+
 Useful options:
 ```bash
 python main.py --no-process

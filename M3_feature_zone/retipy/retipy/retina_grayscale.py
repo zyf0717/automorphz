@@ -23,7 +23,6 @@ import numpy as np
 import cv2
 from scipy import ndimage
 from skimage import io
-from matplotlib import pyplot as plt
 from os import path
 from PIL import Image
 from io import BytesIO
@@ -327,6 +326,6 @@ class Retina_grayscale(object):
 
     def view(self):  # pragma: no cover
         """show a window with the internal image"""
+        from matplotlib import pyplot as plt
         io.imshow(self.np_image)
         plt.show()
-

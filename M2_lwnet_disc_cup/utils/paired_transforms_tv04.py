@@ -14,17 +14,16 @@ import types
 import collections
 import warnings
 from importlib.metadata import PackageNotFoundError, version
+from packaging.version import parse as parse_version
 
 from torchvision.transforms import functional as F
-
-import distutils.version
 
 try:
     _torchvision_version = version("torchvision")
 except PackageNotFoundError:
     _torchvision_version = "0"
 
-TORCHVISION_VERSION = distutils.version.LooseVersion(_torchvision_version)
+TORCHVISION_VERSION = parse_version(_torchvision_version)
 
 if sys.version_info < (3, 3):
     Sequence = collections.Sequence
@@ -1123,7 +1122,7 @@ class RandomRotation(object):
 
         angle = self.get_params(self.degrees)
 
-        if TORCHVISION_VERSION <= distutils.version.LooseVersion("0.4.2"):
+        if TORCHVISION_VERSION <= parse_version("0.4.2"):
             # the "fill" argument was only introduced in torchvision==0.5.0
             if target is not None:
                 return F.rotate(img, angle, self.resample, self.expand, self.center), \

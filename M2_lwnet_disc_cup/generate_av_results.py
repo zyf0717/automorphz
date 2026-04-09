@@ -11,9 +11,7 @@ import torch
 import torch.nn.functional as F
 import torchvision
 from pathlib import Path
-from skimage import measure
 import pandas as pd
-from skimage.morphology import remove_small_objects
 import logging
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -99,6 +97,8 @@ def intersection(mask,vessel_, it_x, it_y):
     
 
 def optic_disc_centre(result_path, binary_vessel_path, artery_vein_path):
+    from skimage import measure
+
     if os.path.exists(result_path+'.ipynb_checkpoints'):
         shutil.rmtree(result_path+'.ipynb_checkpoints')
         
@@ -522,7 +522,8 @@ def misc_measures(true_vessel_arr, pred_vessel_arr):
     
         
 def prediction_eval(model_1,model_2,model_3,model_4,model_5,model_6,model_7,model_8, test_loader):
-    
+    from skimage.morphology import remove_small_objects
+
     n_val = len(test_loader)
     
     seg_results_small_path = f'{AUTOMORPH_DATA}/Results/M2/optic_disc_cup/resized/'

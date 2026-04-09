@@ -127,3 +127,10 @@ Results/
 # Images folder(s)
 Fundus/
 images/
+eye/
+
+# macOS
+*.DS_Store*
+
+# Custom resolution file
+resolution_information.csv

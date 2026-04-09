@@ -109,6 +109,11 @@ If your raw data is stored recursively under a nested folder, flatten it into th
 python -m helpers.flatten_nested path/to/nested_folder
 ```
 
+If your raw data is stored as one-PDF-per-eye exports, extract the primary fundus image from each PDF into `images/` with:
+```bash
+python -m helpers.extract_pdf_fundus eye
+```
+
 Useful options:
 ```bash
 python main.py --no-process

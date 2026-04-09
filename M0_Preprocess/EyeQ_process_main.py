@@ -3,7 +3,6 @@ import logging
 import os
 import pandas as pd
 from PIL import ImageFile
-import shutil
 
 from runtime_utils import configure_logging
 
@@ -48,8 +47,6 @@ def process(image_list, save_path):
 
 
 if __name__ == "__main__":
-    if os.path.exists(f'{AUTOMORPH_DATA}/images/.ipynb_checkpoints'):
-        shutil.rmtree(f'{AUTOMORPH_DATA}/images/.ipynb_checkpoints')
     image_list = sorted(os.listdir(f'{AUTOMORPH_DATA}/images'))
     save_path = f'{AUTOMORPH_DATA}/Results/M0/images/'
     if not os.path.exists(save_path):
@@ -58,6 +55,5 @@ if __name__ == "__main__":
     process(image_list, save_path)
 
         
-
 
 

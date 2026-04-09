@@ -21,6 +21,7 @@ import logging
 from copy import copy
 import numpy as np
 import cv2
+from matplotlib import pyplot as plt
 from scipy import ndimage
 from skimage import io
 from os import path
@@ -326,6 +327,5 @@ class Retina_grayscale(object):
 
     def view(self):  # pragma: no cover
         """show a window with the internal image"""
-        from matplotlib import pyplot as plt
         io.imshow(self.np_image)
         plt.show()

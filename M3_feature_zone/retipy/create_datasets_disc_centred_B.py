@@ -28,7 +28,6 @@ import glob
 import os
 import sys
 import h5py
-import shutil
 import pandas as pd
 from pathlib import Path
 # import scipy.stats as stats
@@ -42,19 +41,8 @@ from runtime_utils import portable_basename
 
 AUTOMORPH_DATA = os.getenv('AUTOMORPH_DATA','../..')
 
-
-if os.path.exists(f'{AUTOMORPH_DATA}/Results/M2/artery_vein/Zone_B_disc_centred_artery_skeleton/.ipynb_checkpoints'):
-    shutil.rmtree(f'{AUTOMORPH_DATA}/Results/M2/artery_vein/Zone_B_disc_centred_artery_skeleton/.ipynb_checkpoints') 
-if os.path.exists(f'{AUTOMORPH_DATA}/Results/M2/binary_vessel/Zone_B_disc_centred_binary_skeleton/.ipynb_checkpoints'):
-    shutil.rmtree(f'{AUTOMORPH_DATA}/Results/M2/binary_vessel/Zone_B_disc_centred_binary_skeleton/.ipynb_checkpoints') 
-if os.path.exists(f'{AUTOMORPH_DATA}/Results/M2/artery_vein/Zone_B_disc_centred_vein_skeleton/.ipynb_checkpoints'):
-    shutil.rmtree(f'{AUTOMORPH_DATA}/Results/M2/artery_vein/Zone_B_disc_centred_vein_skeleton/.ipynb_checkpoints')
 if not os.path.exists(f'{AUTOMORPH_DATA}/Results/M3/Disc_centred/Width/'):
     os.makedirs(f'{AUTOMORPH_DATA}/Results/M3/Disc_centred/Width/')
-
-#if os.path.exists('./DDR/av_seg/raw/.ipynb_checkpoints'):
-#    shutil.rmtree('./DDR/av_seg/raw/.ipynb_checkpoints') 
-
 
 parser = argparse.ArgumentParser()
 
@@ -236,4 +224,3 @@ Data4stage2['AVR_Hubbard'] = Data4stage2['CRAE_Hubbard']/Data4stage2['CRVE_Hubba
 Data4stage2['AVR_Knudtson'] = Data4stage2['CRAE_Knudtson']/Data4stage2['CRVE_Knudtson']
 
 Data4stage2.to_csv(f'{AUTOMORPH_DATA}/Results/M3/Disc_centred/Disc_Zone_B_Measurement.csv', index = None, encoding='utf8')
-

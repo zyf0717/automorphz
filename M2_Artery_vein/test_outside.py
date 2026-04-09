@@ -2,7 +2,6 @@
 import torch.nn.functional as F
 import argparse
 import logging
-import shutil
 import os
 import cv2
 import torchvision
@@ -23,9 +22,6 @@ from skimage.morphology import skeletonize,remove_small_objects
 AUTOMORPH_DATA = os.getenv('AUTOMORPH_DATA','..')
 
 def filter_frag(data_path):
-    if os.path.isdir(data_path + 'raw/.ipynb_checkpoints'):
-        shutil.rmtree(data_path + 'raw/.ipynb_checkpoints')
-
     image_list=os.listdir(data_path + 'raw')
     FD_cal_r=[]
     name_list=[]
@@ -446,4 +442,3 @@ if __name__ == '__main__':
         
         #Data4stage2 = pd.DataFrame({'Image_id':name_list, 'FD_boxC_vein':FD_list_v, 'Vessel_Density_vein':VD_list_b})
         #Data4stage2.to_csv('../Results/M3/Vein_Features_Measurement.csv', index = None, encoding='utf8')
-

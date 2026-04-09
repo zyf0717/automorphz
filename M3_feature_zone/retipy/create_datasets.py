@@ -29,7 +29,6 @@ import logging
 import os
 import sys
 import h5py
-import shutil
 import pandas as pd
 from pathlib import Path
 # import scipy.stats as stats
@@ -45,17 +44,8 @@ AUTOMORPH_DATA = os.getenv('AUTOMORPH_DATA','../..')
 configure_logging()
 LOGGER = logging.getLogger(__name__)
 
-if os.path.exists(f'{AUTOMORPH_DATA}/Results/M2/artery_vein/artery_binary_skeleton/.ipynb_checkpoints'):
-    shutil.rmtree(f'{AUTOMORPH_DATA}/Results/M2/artery_vein/artery_binary_skeleton/.ipynb_checkpoints') 
-if os.path.exists(f'{AUTOMORPH_DATA}/Results/M2/binary_vessel/binary_skeleton/.ipynb_checkpoints'):
-    shutil.rmtree(f'{AUTOMORPH_DATA}/Results/M2/binary_vessel/binary_skeleton/.ipynb_checkpoints') 
-if os.path.exists(f'{AUTOMORPH_DATA}/Results/M2/artery_vein/vein_binary_skeleton/.ipynb_checkpoints'):
-    shutil.rmtree(f'{AUTOMORPH_DATA}/Results/M2/artery_vein/vein_binary_skeleton/.ipynb_checkpoints')
 if not os.path.exists(f'{AUTOMORPH_DATA}/Results/M3/Width/'):
     os.makedirs(f'{AUTOMORPH_DATA}/Results/M3/Width/')
-
-#if os.path.exists('./DDR/av_seg/raw/.ipynb_checkpoints'):
-#    shutil.rmtree('./DDR/av_seg/raw/.ipynb_checkpoints') 
 
 
 parser = argparse.ArgumentParser()

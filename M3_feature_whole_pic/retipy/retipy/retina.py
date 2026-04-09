@@ -25,6 +25,7 @@ from io import BytesIO
 from function_ import thinning
 from os import path
 from PIL import Image
+from matplotlib import pyplot as plt
 from scipy import ndimage
 from skimage import color, feature, filters, io
 from skimage.morphology import skeletonize
@@ -245,7 +246,6 @@ class Retina(object):
 
     def view(self):  # pragma: no cover
         """show a window with the internal image"""
-        from matplotlib import pyplot as plt
         io.imshow(self.np_image)
         plt.show()
 
@@ -368,7 +368,6 @@ class Window(Retina):
         return image
 
     def view_window(self, w_id, layer):  # pragma: no cover
-        from matplotlib import pyplot as plt
         io.imshow(self.windows[w_id, layer])
         plt.show()
 

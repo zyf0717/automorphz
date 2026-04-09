@@ -15,14 +15,10 @@ import torchvision
 from skimage.morphology import skeletonize,remove_small_objects
 from skimage import io
 from FD_cal import fractal_dimension,vessel_density
-import shutil
 
 AUTOMORPH_DATA = os.getenv('AUTOMORPH_DATA','..')
 
 def filter_frag(data_path):
-    if os.path.isdir(data_path + 'resize_binary/.ipynb_checkpoints'):
-        shutil.rmtree(data_path + 'resize_binary/.ipynb_checkpoints')
-
     image_list=os.listdir(data_path + 'resize_binary')
     FD_cal=[]
     name_list=[]

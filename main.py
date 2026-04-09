@@ -11,8 +11,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from config_utils import DEFAULT_CONFIG_PATH
-from runtime_utils import configure_logging
+from helpers.config import DEFAULT_CONFIG_PATH
+from helpers.runtime import configure_logging
 
 REPO_ROOT = Path(__file__).resolve().parent
 LOGGER = logging.getLogger(__name__)
@@ -106,7 +106,7 @@ def run_feature_measurement() -> None:
     ]:
         run_command([sys.executable, script_name], cwd=whole_pic_cwd)
 
-    run_command([sys.executable, "csv_merge.py"], cwd=REPO_ROOT)
+    run_command([sys.executable, "-m", "helpers.csv_merge"], cwd=REPO_ROOT)
 
 
 def build_parser() -> argparse.ArgumentParser:

@@ -27,7 +27,7 @@ import sys
 from PIL import Image
 from retipy import tortuosity
 
-from runtime_utils import configure_logging
+from helpers.runtime import configure_logging
 
 parser = argparse.ArgumentParser()
 parser.add_argument(

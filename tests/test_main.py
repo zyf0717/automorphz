@@ -36,7 +36,7 @@ def test_main_runs_stages_in_order(monkeypatch) -> None:
         ([main.sys.executable, "create_datasets_macular_centred_C.py"], main.REPO_ROOT / "M3_feature_zone" / "retipy"),
         ([main.sys.executable, "create_datasets_macular_centred.py"], main.REPO_ROOT / "M3_feature_whole_pic" / "retipy"),
         ([main.sys.executable, "create_datasets_disc_centred.py"], main.REPO_ROOT / "M3_feature_whole_pic" / "retipy"),
-        ([main.sys.executable, "csv_merge.py"], main.REPO_ROOT),
+        ([main.sys.executable, "-m", "helpers.csv_merge"], main.REPO_ROOT),
     ]
 
 

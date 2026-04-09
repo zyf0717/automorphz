@@ -4,7 +4,7 @@ import os
 import pandas as pd
 from PIL import ImageFile
 
-from runtime_utils import configure_logging
+from helpers.runtime import configure_logging
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
@@ -55,5 +55,3 @@ if __name__ == "__main__":
     process(image_list, save_path)
 
         
-
-

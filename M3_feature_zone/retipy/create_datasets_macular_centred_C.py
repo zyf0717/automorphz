@@ -37,7 +37,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from retipy import configuration, retina, tortuosity_measures
-from runtime_utils import portable_basename
+from helpers.runtime import portable_basename
 
 AUTOMORPH_DATA = os.getenv('AUTOMORPH_DATA','../..')
 

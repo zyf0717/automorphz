@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from csv_merge import cleanup_intermediate_dirs, merge_feature_tables, write_feature_tables
+from helpers.csv_merge import cleanup_intermediate_dirs, merge_feature_tables, write_feature_tables
 
 
 def write_csv(path: Path, rows: list[dict[str, object]]) -> None:

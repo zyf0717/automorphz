@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import re
-import sys
 
 
 def _split_path(path: str) -> list[str]:

@@ -4,7 +4,7 @@ from .res_unet_adrian import UNet as unet
 
 import torch
 
-from runtime_utils import configure_logging
+from helpers.runtime import configure_logging
 
 # from .res_unet_adrian import WNet as wnet
 class wnet(torch.nn.Module):

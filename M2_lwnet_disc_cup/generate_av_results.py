@@ -26,7 +26,7 @@ if str(REPO_ROOT) not in sys.path:
 from models.get_model import get_arch
 from utils.get_loaders import get_test_dataset
 from utils.model_saving_loading import load_model
-from runtime_utils import parse_image_size, resolve_setting, resolve_torch_device
+from helpers.runtime import parse_image_size, resolve_setting, resolve_torch_device
 
 AUTOMORPH_DATA = os.getenv('AUTOMORPH_DATA','..')
 

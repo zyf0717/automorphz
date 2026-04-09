@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from config_utils import load_config
+from helpers.config import load_config
 
 
 def test_load_config_reads_mapping(tmp_path: Path) -> None:

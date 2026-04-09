@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from runtime_utils import configure_logging
+from helpers.runtime import configure_logging
 
 LOGGER = logging.getLogger(__name__)
 

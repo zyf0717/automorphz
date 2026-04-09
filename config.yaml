@@ -1,5 +1,5 @@
 input:
-  global_resolution: 0.00185
+  global_resolution: 0.000925
 
 quality:
   batch_size: 64

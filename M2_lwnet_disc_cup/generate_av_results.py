@@ -518,7 +518,18 @@ def misc_measures(true_vessel_arr, pred_vessel_arr):
     
     
         
-def prediction_eval(model_1,model_2,model_3,model_4,model_5,model_6,model_7,model_8, test_loader):
+def prediction_eval(
+    model_1,
+    model_2,
+    model_3,
+    model_4,
+    model_5,
+    model_6,
+    model_7,
+    model_8,
+    test_loader,
+    device,
+):
     n_val = len(test_loader)
     
     seg_results_small_path = f'{AUTOMORPH_DATA}/Results/M2/optic_disc_cup/resized/'
@@ -718,7 +729,18 @@ def main(argv: list[str] | None = None) -> int:
     model_8.eval()
 
 
-    prediction_eval(model_1,model_2,model_3,model_4,model_5,model_6,model_7,model_8, test_loader)
+    prediction_eval(
+        model_1,
+        model_2,
+        model_3,
+        model_4,
+        model_5,
+        model_6,
+        model_7,
+        model_8,
+        test_loader,
+        device,
+    )
     
     result_path = f'{AUTOMORPH_DATA}/Results/M2/optic_disc_cup/resized/'
     binary_vessel_path = f'{AUTOMORPH_DATA}/Results/M2/binary_vessel/'

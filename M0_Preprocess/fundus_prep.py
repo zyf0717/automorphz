@@ -71,6 +71,15 @@ def _get_radius_by_mask_center(mask,center):
     mask=cv2.morphologyEx(mask, cv2.MORPH_GRADIENT, kernel)
     # radius=
     index=np.where(mask>0)
+    if len(index[0]) == 0:
+        return int(
+            min(
+                center[0],
+                center[1],
+                mask.shape[0] - center[0] - 1,
+                mask.shape[1] - center[1] - 1,
+            )
+        )
     d_int=np.sqrt((index[0]-center[0])**2+(index[1]-center[1])**2)
     b_count=np.bincount(np.ceil(d_int).astype(int))
     radius=np.where(b_count>b_count.max()*0.995)[0].max()
@@ -181,4 +190,3 @@ def process_without_gb(img, label,radius_list,centre_list_w, centre_list_h):
     centre_list_w.append(int(center[0]))
     centre_list_h.append(int(center[1]))
     return r_img,borders,(mask*255).astype(np.uint8),label, radius_list,centre_list_w, centre_list_h
-

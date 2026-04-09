@@ -24,8 +24,13 @@ import logging
 import json
 import numpy as np
 import sys
+from pathlib import Path
 from PIL import Image
 from retipy import tortuosity
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from helpers.runtime import configure_logging
 

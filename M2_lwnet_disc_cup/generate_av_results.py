@@ -26,7 +26,7 @@ if str(REPO_ROOT) not in sys.path:
 from models.get_model import get_arch
 from utils.get_loaders import get_test_dataset
 from utils.model_saving_loading import load_model
-from helpers.runtime import parse_image_size, resolve_setting, resolve_torch_device
+from helpers.runtime import configure_logging, parse_image_size, resolve_setting, resolve_torch_device
 
 AUTOMORPH_DATA = os.getenv('AUTOMORPH_DATA','..')
 
@@ -666,7 +666,7 @@ def prediction_eval(
 
 
 def main(argv: list[str] | None = None) -> int:
-    logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+    configure_logging()
     args = parser.parse_args(argv)
     try:
         experiment_config, tg_size, device = resolve_runtime_options(

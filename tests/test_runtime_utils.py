@@ -1,6 +1,11 @@
 from __future__ import annotations
 
+import io
+import logging
+import re
+
 from helpers.runtime import (
+    configure_logging,
     parse_image_size,
     portable_basename,
     portable_parent_name,
@@ -35,3 +40,13 @@ def test_resolve_setting_preserves_manual_override() -> None:
 def test_parse_image_size_accepts_square_and_rectangular_values() -> None:
     assert parse_image_size("512") == (512, 512)
     assert parse_image_size("600,400") == (600, 400)
+
+
+def test_configure_logging_prefixes_gmt8_iso_timestamp() -> None:
+    stream = io.StringIO()
+
+    configure_logging(stream=stream)
+    logging.getLogger("tests.runtime").info("hello")
+
+    output = stream.getvalue().strip()
+    assert re.match(r"^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+08:00\] hello$", output)

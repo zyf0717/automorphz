@@ -3,6 +3,8 @@ import torch.nn.functional as F
 import argparse
 import logging
 import os
+import sys
+from pathlib import Path
 import cv2
 import torchvision
 import torch
@@ -18,6 +20,12 @@ from skimage import io
 from scripts.utils import Define_image_size
 from FD_cal import fractal_dimension,vessel_density
 from skimage.morphology import skeletonize,remove_small_objects
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from helpers.runtime import configure_logging
 
 AUTOMORPH_DATA = os.getenv('AUTOMORPH_DATA','..')
 
@@ -274,7 +282,7 @@ def get_args():
 
 if __name__ == '__main__':
     
-    logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+    configure_logging()
     args = get_args()
     # Check if CUDA is available
     if torch.cuda.is_available():

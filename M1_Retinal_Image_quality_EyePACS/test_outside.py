@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 import time
+from pathlib import Path
 import torch
 import numpy as np
 import pandas as pd
@@ -12,6 +13,12 @@ from tqdm import tqdm
 from dataset import BasicDataset_OUT
 from torch.utils.data import DataLoader
 from model import Resnet101_fl, InceptionV3_fl, Densenet161_fl, Resnext101_32x8d_fl, MobilenetV2_fl, Vgg16_bn_fl, Efficientnet_fl
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from helpers.runtime import configure_logging
 
 AUTOMORPH_DATA = os.getenv('AUTOMORPH_DATA','..')
 
@@ -169,7 +176,7 @@ def get_args():
 
 if __name__ == '__main__':
     
-    logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+    configure_logging()
     args = get_args()
     
 
@@ -285,7 +292,6 @@ if __name__ == '__main__':
             sys.exit(0)
         except SystemExit:
             os._exit(0)
-
 
 
 

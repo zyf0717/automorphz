@@ -36,6 +36,12 @@ parser.add_argument('--config_file', type=str, default=None,
                     help='experiments/name_of_config_file, overrides everything')
 parser.add_argument('--im_size', help='delimited list input, could be 600,400', type=str, default=None)
 parser.add_argument('--device', type=str, default=None, help='where to run the code (e.g. "cpu", "mps", or "cuda:0")')
+parser.add_argument(
+    '--disc-center-max-ratio',
+    type=float,
+    default=0.1,
+    help='Maximum normalized optic disc centre distance to classify an image as disc centred',
+)
 
 
 def load_experiment_config(config_file: str | None) -> dict:
@@ -98,9 +104,10 @@ def intersection(mask,vessel_, it_x, it_y):
     
     
 
-def optic_disc_centre(result_path, binary_vessel_path, artery_vein_path):
+def optic_disc_centre(result_path, binary_vessel_path, artery_vein_path, disc_center_max_ratio):
     optic_binary_result_path = f'{AUTOMORPH_DATA}/Results/M3/Disc_centred/'
     macular_binary_result_path = f'{AUTOMORPH_DATA}/Results/M3/Macular_centred/'
+    force_disc_centred = disc_center_max_ratio >= 1.0
     
     #2023/08/24
     disc_process_binary_vessel_path = binary_vessel_path + 'disc_centred_binary_process/'
@@ -387,7 +394,7 @@ def optic_disc_centre(result_path, binary_vessel_path, artery_vein_path):
 
 
 
-                if (distance_/disc_cup_912.shape[1])<0.1:
+                if (distance_/disc_cup_912.shape[1]) < disc_center_max_ratio:
                     optic_centre_list.append(i)
                     cv2.imwrite(B_optic_process_binary_vessel_path+i,binary_process_B)
                     cv2.imwrite(B_optic_process_artery_path+i,artery_process_B)
@@ -457,6 +464,60 @@ def optic_disc_centre(result_path, binary_vessel_path, artery_vein_path):
         
             
             else:
+                if force_disc_centred:
+                    optic_centre_list.append(i)
+                    shutil.copy(binary_vessel_path+'binary_process/'+i,disc_process_binary_vessel_path+i)
+                    shutil.copy(artery_vein_path+'artery_binary_process/'+i,disc_process_artery_path+i)
+                    shutil.copy(artery_vein_path+'vein_binary_process/'+i,disc_process_vein_path+i)
+                    shutil.copy(binary_vessel_path+'binary_skeleton/'+i,disc_skeleton_binary_vessel_path+i)
+                    shutil.copy(artery_vein_path+'artery_binary_skeleton/'+i,disc_skeleton_artery_path+i)
+                    shutil.copy(artery_vein_path+'vein_binary_skeleton/'+i,disc_skeleton_vein_path+i)
+
+                    optic_vertical_disc.append(-1)
+                    optic_horizontal_disc.append(-1)
+
+                    optic_vertical_cup.append(-1)
+                    optic_horizontal_cup.append(-1)
+
+                    optic_vertical_CDR.append(-1)
+                    optic_horizontal_CDR.append(-1)
+                else:
+                    macular_centre_list.append(i)
+                    shutil.copy(binary_vessel_path+'binary_process/'+i,macular_process_binary_vessel_path+i)
+                    shutil.copy(artery_vein_path+'artery_binary_process/'+i,macular_process_artery_path+i)
+                    shutil.copy(artery_vein_path+'vein_binary_process/'+i,macular_process_vein_path+i)
+                    shutil.copy(binary_vessel_path+'binary_skeleton/'+i,macular_skeleton_binary_vessel_path+i)
+                    shutil.copy(artery_vein_path+'artery_binary_skeleton/'+i,macular_skeleton_artery_path+i)
+                    shutil.copy(artery_vein_path+'vein_binary_skeleton/'+i,macular_skeleton_vein_path+i)
+
+                    macular_vertical_disc.append(-1)
+                    macular_horizontal_disc.append(-1)
+
+                    macular_vertical_cup.append(-1)
+                    macular_horizontal_cup.append(-1)
+
+                    macular_vertical_CDR.append(-1)
+                    macular_horizontal_CDR.append(-1)
+                
+        except:
+            if force_disc_centred:
+                optic_centre_list.append(i)
+                shutil.copy(binary_vessel_path+'binary_process/'+i,disc_process_binary_vessel_path+i)
+                shutil.copy(artery_vein_path+'artery_binary_process/'+i,disc_process_artery_path+i)
+                shutil.copy(artery_vein_path+'vein_binary_process/'+i,disc_process_vein_path+i)
+                shutil.copy(binary_vessel_path+'binary_skeleton/'+i,disc_skeleton_binary_vessel_path+i)
+                shutil.copy(artery_vein_path+'artery_binary_skeleton/'+i,disc_skeleton_artery_path+i)
+                shutil.copy(artery_vein_path+'vein_binary_skeleton/'+i,disc_skeleton_vein_path+i)
+
+                optic_vertical_disc.append(-1)
+                optic_horizontal_disc.append(-1)
+
+                optic_vertical_cup.append(-1)
+                optic_horizontal_cup.append(-1)
+
+                optic_vertical_CDR.append(-1)
+                optic_horizontal_CDR.append(-1)
+            else:
                 macular_centre_list.append(i)
                 shutil.copy(binary_vessel_path+'binary_process/'+i,macular_process_binary_vessel_path+i)
                 shutil.copy(artery_vein_path+'artery_binary_process/'+i,macular_process_artery_path+i)
@@ -473,24 +534,6 @@ def optic_disc_centre(result_path, binary_vessel_path, artery_vein_path):
 
                 macular_vertical_CDR.append(-1)
                 macular_horizontal_CDR.append(-1)
-                
-        except:
-            macular_centre_list.append(i)
-            shutil.copy(binary_vessel_path+'binary_process/'+i,macular_process_binary_vessel_path+i)
-            shutil.copy(artery_vein_path+'artery_binary_process/'+i,macular_process_artery_path+i)
-            shutil.copy(artery_vein_path+'vein_binary_process/'+i,macular_process_vein_path+i)
-            shutil.copy(binary_vessel_path+'binary_skeleton/'+i,macular_skeleton_binary_vessel_path+i)
-            shutil.copy(artery_vein_path+'artery_binary_skeleton/'+i,macular_skeleton_artery_path+i)
-            shutil.copy(artery_vein_path+'vein_binary_skeleton/'+i,macular_skeleton_vein_path+i)
-
-            macular_vertical_disc.append(-1)
-            macular_horizontal_disc.append(-1)
-
-            macular_vertical_cup.append(-1)
-            macular_horizontal_cup.append(-1)
-
-            macular_vertical_CDR.append(-1)
-            macular_horizontal_CDR.append(-1)
                 
             
     Pd_optic_centre = pd.DataFrame({'Name':optic_centre_list, 'Disc_height':optic_vertical_disc, 'Disc_width':optic_horizontal_disc, 'Cup_height': optic_vertical_cup, 'Cup_width': optic_horizontal_cup, 'CDR_vertical': optic_vertical_CDR, 'CDR_horizontal': optic_horizontal_CDR})
@@ -750,7 +793,12 @@ def main(argv: list[str] | None = None) -> int:
     binary_vessel_path = f'{AUTOMORPH_DATA}/Results/M2/binary_vessel/'
     artery_vein_path = f'{AUTOMORPH_DATA}/Results/M2/artery_vein/'
     
-    optic_disc_centre(result_path,binary_vessel_path, artery_vein_path)
+    optic_disc_centre(
+        result_path,
+        binary_vessel_path,
+        artery_vein_path,
+        args.disc_center_max_ratio,
+    )
     return 0
 
 

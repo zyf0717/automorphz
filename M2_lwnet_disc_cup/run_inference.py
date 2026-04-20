@@ -23,6 +23,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--config-file", default=None)
     parser.add_argument("--image-size", type=int, default=None)
     parser.add_argument("--device", default=None)
+    parser.add_argument("--disc-center-max-ratio", type=float, default=None)
     return parser
 
 def main() -> int:
@@ -31,6 +32,11 @@ def main() -> int:
     config_file = args.config_file if args.config_file is not None else cfg["config_file"]
     image_size = args.image_size if args.image_size is not None else cfg["image_size"]
     raw_device = args.device if args.device is not None else cfg.get("device")
+    disc_center_max_ratio = (
+        args.disc_center_max_ratio
+        if args.disc_center_max_ratio is not None
+        else cfg.get("disc_center_max_ratio", 0.1)
+    )
     device = resolve_torch_device(
         raw_device,
         cuda_available=torch.cuda.is_available(),
@@ -46,6 +52,8 @@ def main() -> int:
             str(image_size),
             "--device",
             device,
+            "--disc-center-max-ratio",
+            str(disc_center_max_ratio),
         ],
         cwd=SCRIPT_DIR,
         check=True,

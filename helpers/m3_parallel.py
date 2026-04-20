@@ -28,9 +28,7 @@ def run_records_in_pool(
         logger.info("%s: no images to process", label)
         return []
 
-    logger.info("%s: processing %d images with %d workers", label, total, workers)
-
-    if workers <= 1:
+    def run_serially() -> list:
         results = []
         for index, item in enumerate(items, start=1):
             result = worker(item)
@@ -41,12 +39,25 @@ def run_records_in_pool(
             results.append(result)
         return results
 
+    logger.info("%s: processing %d images with %d workers", label, total, workers)
+
+    if workers <= 1:
+        return run_serially()
+
     results = []
-    with ProcessPoolExecutor(max_workers=workers) as executor:
-        for index, result in enumerate(executor.map(worker, items), start=1):
-            if index == 1 or index == total or index % progress_every == 0:
-                logger.info("%s: processed %d/%d", label, index, total)
-            if isinstance(result, dict) and result.get("_error"):
-                logger.error("%s: %s", label, result["_error"])
-            results.append(result)
+    try:
+        with ProcessPoolExecutor(max_workers=workers) as executor:
+            for index, result in enumerate(executor.map(worker, items), start=1):
+                if index == 1 or index == total or index % progress_every == 0:
+                    logger.info("%s: processed %d/%d", label, index, total)
+                if isinstance(result, dict) and result.get("_error"):
+                    logger.error("%s: %s", label, result["_error"])
+                results.append(result)
+    except PermissionError as exc:
+        logger.warning(
+            "%s: process pool unavailable (%s); falling back to serial execution",
+            label,
+            exc,
+        )
+        return run_serially()
     return results

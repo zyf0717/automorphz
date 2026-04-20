@@ -128,6 +128,7 @@ Results/
 Fundus/
 images/
 eye/
+.automorph_sample_run/
 
 # macOS
 *.DS_Store*

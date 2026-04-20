@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
 from datetime import datetime
 from datetime import timedelta
@@ -57,6 +58,16 @@ def resolve_setting(
     if config_value is not None:
         return config_value
     return default
+
+
+def inference_num_workers(default: int = 0) -> int:
+    raw_value = os.getenv("AUTOMORPH_INFERENCE_WORKERS")
+    if raw_value is None:
+        return default
+    value = int(raw_value)
+    if value < 0:
+        raise ValueError("AUTOMORPH_INFERENCE_WORKERS must be non-negative")
+    return value
 
 
 def parse_image_size(value: str) -> tuple[int, int]:

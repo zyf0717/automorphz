@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib
 import logging
+import os
 import sys
 from pathlib import Path
 
@@ -221,6 +222,9 @@ def _run_phase(
     logger: logging.Logger,
     label: str,
 ) -> list[dict[str, float | str]]:
+    store_path_value = os.fspath(store_path)
+    if not store_path_value.endswith(os.sep):
+        store_path_value = f"{store_path_value}{os.sep}"
     tasks = [
         (
             phase,
@@ -229,7 +233,7 @@ def _run_phase(
             pixels_per_window,
             sampling_size,
             r2_threshold,
-            str(store_path),
+            store_path_value,
         )
         for filename in files
     ]

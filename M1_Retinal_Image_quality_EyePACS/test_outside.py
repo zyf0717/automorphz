@@ -18,7 +18,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from helpers.runtime import configure_logging
+from helpers.runtime import configure_logging, inference_num_workers
 
 AUTOMORPH_DATA = os.getenv('AUTOMORPH_DATA','..')
 
@@ -47,7 +47,14 @@ def test_net(model_fl_1,
     dataset = BasicDataset_OUT(test_dir, image_size, n_classes, train_or=False)
         
     n_test = len(dataset)
-    val_loader = DataLoader(dataset, batch_size, shuffle=False, num_workers=8, pin_memory=False, drop_last=False)
+    val_loader = DataLoader(
+        dataset,
+        batch_size,
+        shuffle=False,
+        num_workers=inference_num_workers(),
+        pin_memory=False,
+        drop_last=False,
+    )
     
     prediction_decode_list = []
     filename_list = []
@@ -292,7 +299,6 @@ if __name__ == '__main__':
             sys.exit(0)
         except SystemExit:
             os._exit(0)
-
 
 
 

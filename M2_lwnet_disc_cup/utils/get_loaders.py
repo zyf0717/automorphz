@@ -12,6 +12,7 @@ from skimage.measure import regionprops
 import torch
 import logging
 from glob import glob
+from helpers.runtime import inference_num_workers
 
 class TrainDataset(Dataset):
     def __init__(self, csv_path, transforms=None, label_values=None):
@@ -214,11 +215,16 @@ def get_train_val_loaders(csv_path_train, csv_path_val, seed_num, batch_size=4, 
     val_loader = DataLoader(dataset=val_dataset, batch_size=batch_size, num_workers=num_workers, pin_memory=torch.cuda.is_available())
     return train_loader, val_loader
 
-def get_test_dataset(data_path, csv_path='test.csv', tg_size=(512, 512)):
+def get_test_dataset(data_path, csv_path='test.csv', tg_size=(512, 512), num_workers=None):
     # csv_path will only not be test.csv when we want to build training set predictions
     #path_test_csv = osp.join(data_path, csv_path)
     path_test_csv = data_path
     test_dataset = TestDataset(csv_path=path_test_csv, tg_size=tg_size)
-    test_loader = DataLoader(dataset=test_dataset, batch_size=16, num_workers=8, pin_memory=False)
+    test_loader = DataLoader(
+        dataset=test_dataset,
+        batch_size=16,
+        num_workers=inference_num_workers() if num_workers is None else num_workers,
+        pin_memory=False,
+    )
 
     return test_loader

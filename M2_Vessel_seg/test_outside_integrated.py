@@ -22,7 +22,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from helpers.runtime import configure_logging
+from helpers.runtime import configure_logging, inference_num_workers
 
 AUTOMORPH_DATA = os.getenv('AUTOMORPH_DATA','..')
 
@@ -180,7 +180,14 @@ def test_net(data_path, batch_size, device, dataset_train, dataset_test, image_s
     VD_list = []
     
     dataset_data = SEDataset_out(test_dir, test_label, mask_dir, image_size, dataset_test, threshold, uniform='True', train_or=False)
-    test_loader = DataLoader(dataset_data, batch_size=batch_size, shuffle=False, num_workers=8, pin_memory=False, drop_last=False)
+    test_loader = DataLoader(
+        dataset_data,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=inference_num_workers(),
+        pin_memory=False,
+        drop_last=False,
+    )
     
     dir_checkpoint_1="./Saved_model/train_on_{}/{}_savebest_randomseed_{}/".format(dataset_train,job_name,24)
     dir_checkpoint_2="./Saved_model/train_on_{}/{}_savebest_randomseed_{}/".format(dataset_train,job_name,26)

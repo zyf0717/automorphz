@@ -43,7 +43,7 @@ optic_disc_cup:
   config_file: experiments/wnet_All_three_1024_disc_cup/30/config.cfg
   image_size: 512
   device: auto
-  disc_center_max_ratio: 1.0
+  disc_center_max_ratio: 0.1
 
 feature_measurement:
   image_workers: 6
